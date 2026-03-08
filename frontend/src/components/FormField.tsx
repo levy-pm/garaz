@@ -1,4 +1,4 @@
-import { UseFormRegister, FieldErrors } from 'react-hook-form';
+import type { UseFormRegister, FieldErrors } from 'react-hook-form';
 
 interface Props {
   label: string;

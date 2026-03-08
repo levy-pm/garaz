@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
-import { CostProfile, costProfilesApi } from '../../api';
+import { costProfilesApi } from '../../api';
+import type { CostProfile } from '../../api';
 import FormField from '../../components/FormField';
 
 export default function CostProfilesPage() {

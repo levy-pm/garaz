@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
-import { AuctionCalc, TargetCar, CostProfile, auctionCalcsApi, targetCarsApi, costProfilesApi } from '../../api';
+import { auctionCalcsApi, targetCarsApi, costProfilesApi } from '../../api';
+import type { AuctionCalc, TargetCar, CostProfile } from '../../api';
 import FormField from '../../components/FormField';
 
 export default function AuctionCalcsPage() {

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
-import { EngineNote, engineNotesApi } from '../../api';
+import { engineNotesApi } from '../../api';
+import type { EngineNote } from '../../api';
 import FormField from '../../components/FormField';
 
 export default function EngineNotesPage() {

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
-import { TargetCar, targetCarsApi } from '../../api';
+import { targetCarsApi } from '../../api';
+import type { TargetCar } from '../../api';
 import FormField from '../../components/FormField';
 
 export default function TargetCarsPage() {

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
-import { ComparisonOffer, TargetCar, comparisonOffersApi, targetCarsApi } from '../../api';
+import { comparisonOffersApi, targetCarsApi } from '../../api';
+import type { ComparisonOffer, TargetCar } from '../../api';
 import FormField from '../../components/FormField';
 
 export default function ComparisonOffersPage() {

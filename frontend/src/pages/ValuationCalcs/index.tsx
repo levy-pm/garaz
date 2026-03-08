@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
-import { ValuationCalc, TargetCar, CostProfile, valuationCalcsApi, targetCarsApi, costProfilesApi } from '../../api';
+import { valuationCalcsApi, targetCarsApi, costProfilesApi } from '../../api';
+import type { ValuationCalc, TargetCar, CostProfile } from '../../api';
 import FormField from '../../components/FormField';
 
 export default function ValuationCalcsPage() {

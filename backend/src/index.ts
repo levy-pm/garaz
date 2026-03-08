@@ -1,5 +1,7 @@
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
+import fs from 'fs';
 import { PrismaClient } from '@prisma/client';
 import targetCarRoutes from './routes/targetCar';
 import comparisonOfferRoutes from './routes/comparisonOffer';
@@ -28,6 +30,17 @@ app.use('/api/cost-profiles', costProfileRoutes);
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
+
+const frontendDistPath = path.resolve(__dirname, '../../frontend/dist');
+const frontendIndexPath = path.join(frontendDistPath, 'index.html');
+
+if (fs.existsSync(frontendIndexPath)) {
+  app.use(express.static(frontendDistPath));
+
+  app.get(/^(?!\/api).*/, (_req, res) => {
+    res.sendFile(frontendIndexPath);
+  });
+}
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
