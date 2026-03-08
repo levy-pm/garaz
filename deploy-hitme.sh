@@ -19,3 +19,6 @@ if [ "$before_commit" != "$after_commit" ] || [ ! -f "$ROOT_DIR/backend/dist/ind
   npm ci --prefix frontend
   npm run build
 fi
+
+mkdir -p "$ROOT_DIR/tmp"
+touch "$ROOT_DIR/tmp/restart.txt"
