@@ -14,10 +14,10 @@ git -c core.sshCommand="$SSH_COMMAND" pull --ff-only origin main
 after_commit="$(git rev-parse HEAD 2>/dev/null || printf 'missing')"
 
 if [ "$before_commit" != "$after_commit" ] || [ ! -f "$ROOT_DIR/backend/dist/index.js" ] || [ ! -f "$ROOT_DIR/frontend/dist/index.html" ]; then
-  npm ci --include=dev
   npm ci --include=dev --prefix backend
   npm ci --include=dev --prefix frontend
-  npm run build
+  npm run build --prefix backend
+  npm run build --prefix frontend
 fi
 
 mkdir -p "$ROOT_DIR/tmp"
