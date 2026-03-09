@@ -1,7 +1,7 @@
 {
-  "name": "garaz-backend",
+  "name": "motometr-backend",
   "version": "1.0.0",
-  "description": "Garaż - backend API for car garage management",
+  "description": "Motometr - backend API for vehicle market analytics",
   "main": "src/index.ts",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",

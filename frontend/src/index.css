@@ -93,22 +93,34 @@ a:hover {
 }
 
 .sidebar-logo {
-  padding: 20px 24px;
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--text-primary);
-  letter-spacing: -0.5px;
+  padding: 18px 20px 14px;
   border-bottom: 1px solid var(--border-color);
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
 }
 
-.sidebar-logo span {
+.sidebar-logo-image {
+  width: 178px;
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.sidebar-version {
   font-family: var(--font-mono);
   font-size: 11px;
   color: var(--text-muted);
   font-weight: 400;
+  letter-spacing: 0.06em;
+}
+
+.sidebar-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border-color);
+  font-size: 11px;
+  color: var(--text-muted);
 }
 
 .sidebar-nav {
@@ -139,6 +151,15 @@ a:hover {
   background: rgba(88, 166, 255, 0.04);
 }
 
+.nav-icon {
+  width: 20px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  opacity: 0.9;
+}
+
 .main-content {
   flex: 1;
   padding: 32px;
@@ -158,6 +179,19 @@ a:hover {
   align-items: center;
   justify-content: space-between;
 }
+
+.mobile-header-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mobile-header-logo {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
 .mobile-header-title {
   font-size: 16px;
   font-weight: 700;
@@ -802,15 +836,28 @@ tbody tr:hover {
   border-radius: var(--radius-lg);
   padding: 40px;
   width: 100%;
-  max-width: 380px;
+  max-width: 430px;
   box-shadow: var(--shadow-lg);
 }
 
+.login-brand {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.login-brand-image {
+  width: 240px;
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
 .login-title {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 700;
   text-align: center;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   letter-spacing: -0.03em;
 }
 
@@ -917,6 +964,10 @@ tbody tr:hover {
   .login-card {
     margin: 16px;
     padding: 28px 20px;
+  }
+
+  .login-brand-image {
+    width: 210px;
   }
 
   /* Table: horizontal scroll on mobile */

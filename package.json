@@ -1,5 +1,5 @@
 {
-  "name": "garaz",
+  "name": "motometr",
   "private": true,
   "scripts": {
     "dev:backend": "cd backend && npm run dev",

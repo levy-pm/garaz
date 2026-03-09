@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import api from '../api/client';
 
 interface Props {
@@ -24,7 +24,7 @@ export default function LoginScreen({ onLogin }: Props) {
         setTimeout(onLogin, 400);
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Błąd logowania');
+      setError(err.response?.data?.message || 'Blad logowania');
     } finally {
       setLoading(false);
     }
@@ -33,7 +33,10 @@ export default function LoginScreen({ onLogin }: Props) {
   return (
     <div className={`login-overlay ${fadeOut ? 'fade-out' : ''}`}>
       <form className="login-card" onSubmit={handleSubmit}>
-        <div className="login-title">Garaż</div>
+        <div className="login-brand">
+          <img src="/motometr_logo.svg" alt="Motometr" className="login-brand-image" />
+        </div>
+        <div className="login-title">Motometr</div>
         <div className="login-subtitle">v2.0 // panel analityczny</div>
 
         {error && <div className="login-error">{error}</div>}
@@ -52,13 +55,13 @@ export default function LoginScreen({ onLogin }: Props) {
         </div>
 
         <div className="form-group">
-          <label className="form-label">Hasło</label>
+          <label className="form-label">Haslo</label>
           <input
             className="form-input"
             type="password"
             value={password}
             onChange={e => setPassword(e.target.value)}
-            placeholder="Wpisz hasło"
+            placeholder="Wpisz haslo"
             autoComplete="current-password"
           />
         </div>
@@ -68,7 +71,7 @@ export default function LoginScreen({ onLogin }: Props) {
           className="btn btn-primary login-btn"
           disabled={loading || !login || !password}
         >
-          {loading ? 'Logowanie...' : 'ZALOGUJ'}
+          {loading ? 'Logowanie...' : 'Zaloguj'}
         </button>
       </form>
     </div>
