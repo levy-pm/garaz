@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import api from '../api/client';
 
 interface Props {
@@ -24,7 +24,7 @@ export default function LoginScreen({ onLogin }: Props) {
         setTimeout(onLogin, 400);
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Blad logowania');
+      setError(err.response?.data?.message || 'Błąd logowania');
     } finally {
       setLoading(false);
     }
@@ -36,8 +36,6 @@ export default function LoginScreen({ onLogin }: Props) {
         <div className="login-brand">
           <img src="/motometr_logo.svg" alt="Motometr" className="login-brand-image" />
         </div>
-        <div className="login-title">Motometr</div>
-        <div className="login-subtitle">v2.0 // panel analityczny</div>
 
         {error && <div className="login-error">{error}</div>}
 
@@ -55,13 +53,13 @@ export default function LoginScreen({ onLogin }: Props) {
         </div>
 
         <div className="form-group">
-          <label className="form-label">Haslo</label>
+          <label className="form-label">Hasło</label>
           <input
             className="form-input"
             type="password"
             value={password}
             onChange={e => setPassword(e.target.value)}
-            placeholder="Wpisz haslo"
+            placeholder="Wpisz hasło"
             autoComplete="current-password"
           />
         </div>

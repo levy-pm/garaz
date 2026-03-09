@@ -1,12 +1,12 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 
 const navItems = [
-  { to: '/', label: 'Start', icon: 'S' },
-  { to: '/vehicles', label: 'Sprawdzane pojazdy', icon: 'V' },
-  { to: '/offers', label: 'Oferty rynkowe', icon: 'O' },
-  { to: '/market', label: 'Sprawdz rynek', icon: 'R' },
-  { to: '/settings', label: 'Ustawienia', icon: 'U' },
+  { to: '/', label: 'Start' },
+  { to: '/vehicles', label: 'Sprawdzane pojazdy' },
+  { to: '/offers', label: 'Oferty rynkowe' },
+  { to: '/market', label: 'Sprawdź rynek' },
+  { to: '/settings', label: 'Ustawienia' },
 ];
 
 export default function Layout() {
@@ -24,7 +24,7 @@ export default function Layout() {
         <button
           className="hamburger-btn"
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          aria-label={sidebarOpen ? 'Zamknij menu' : 'Otworz menu'}
+          aria-label={sidebarOpen ? 'Zamknij menu' : 'Otwórz menu'}
         >
           {sidebarOpen ? 'X' : '☰'}
         </button>
@@ -39,7 +39,6 @@ export default function Layout() {
         <nav className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
           <div className="sidebar-logo">
             <img src="/motometr_logo.svg" alt="Motometr" className="sidebar-logo-image" />
-            <span className="sidebar-version">v2.0</span>
           </div>
           <div className="sidebar-nav">
             {navItems.map(item => (
@@ -50,13 +49,9 @@ export default function Layout() {
                 className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
                 onClick={closeSidebar}
               >
-                <span className="nav-icon">{item.icon}</span>
                 {item.label}
               </NavLink>
             ))}
-          </div>
-          <div className="sidebar-footer">
-            Panel analityczny
           </div>
         </nav>
         <main className="main-content">
