@@ -94,31 +94,21 @@ export default function VehicleForm({ defaultValues, onSubmit, onCancel, showOff
   const [catalogMakes, setCatalogMakes] = useState<string[]>([]);
   const [catalogModels, setCatalogModels] = useState<string[]>([]);
 
-  // Load makes from catalog
+  // Load previously used makes
   useEffect(() => {
-    api.get<{ id: number; name: string }[]>('/catalog/makes')
-      .then(res => setCatalogMakes(res.data.map(m => m.name)))
+    api.get<string[]>('/catalog/makes')
+      .then(res => setCatalogMakes(res.data))
       .catch(() => {});
   }, []);
 
-  // Load models when make changes
+  // Load previously used models for selected make
   useEffect(() => {
     if (!make) {
       setCatalogModels([]);
       return;
     }
-    api.get<{ id: number; name: string }[]>('/catalog/makes')
-      .then(res => {
-        const found = res.data.find(m => m.name === make);
-        if (found) {
-          return api.get<{ id: number; name: string }[]>('/catalog/models', { params: { makeId: found.id } });
-        }
-        return null;
-      })
-      .then(res => {
-        if (res) setCatalogModels(res.data.map(m => m.name));
-        else setCatalogModels([]);
-      })
+    api.get<string[]>('/catalog/models', { params: { make } })
+      .then(res => setCatalogModels(res.data))
       .catch(() => setCatalogModels([]));
   }, [make]);
 

@@ -23,12 +23,16 @@ export default function SearchableSelect({ options, value, onChange, placeholder
     const handleClick = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) {
         setOpen(false);
+        // When closing by clicking outside, commit the typed query as free text
+        if (query && query !== value) {
+          onChange(query);
+        }
         setQuery('');
       }
     };
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
-  }, []);
+  }, [query, value, onChange]);
 
   useEffect(() => {
     setHighlightIndex(0);
@@ -51,6 +55,9 @@ export default function SearchableSelect({ options, value, onChange, placeholder
       e.preventDefault();
       if (filtered[highlightIndex]) {
         handleSelect(filtered[highlightIndex]);
+      } else if (query) {
+        // No match in list — accept typed value as new entry
+        handleSelect(query);
       }
     } else if (e.key === 'Escape') {
       setOpen(false);
@@ -74,12 +81,22 @@ export default function SearchableSelect({ options, value, onChange, placeholder
           setOpen(true);
           setQuery('');
         }}
+        onBlur={() => {
+          // Commit free text on blur (small delay so click-select fires first)
+          setTimeout(() => {
+            if (query && query !== value) {
+              onChange(query);
+            }
+          }, 150);
+        }}
         onKeyDown={handleKeyDown}
       />
       {open && !disabled && (
         <div className="searchable-select-dropdown">
           {filtered.length === 0 ? (
-            <div className="searchable-select-empty">Brak wyników</div>
+            <div className="searchable-select-empty">
+              {query ? `Wpisz Enter aby dodać "${query}"` : 'Brak wyników'}
+            </div>
           ) : (
             filtered.map((opt, i) => (
               <div
