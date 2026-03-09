@@ -1,23 +1,21 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
-import TargetCarsPage from './pages/TargetCars';
-import ComparisonOffersPage from './pages/ComparisonOffers';
-import EngineNotesPage from './pages/EngineNotes';
-import ValuationCalcsPage from './pages/ValuationCalcs';
-import AuctionCalcsPage from './pages/AuctionCalcs';
-import CostProfilesPage from './pages/CostProfiles';
+import StartPage from './pages/Start';
+import CheckedVehiclesPage from './pages/CheckedVehicles';
+import MarketOffersPage from './pages/MarketOffers';
+import MarketCheckPage from './pages/MarketCheck';
+import SettingsPage from './pages/Settings';
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route element={<Layout />}>
-          <Route path="/" element={<TargetCarsPage />} />
-          <Route path="/offers" element={<ComparisonOffersPage />} />
-          <Route path="/engines" element={<EngineNotesPage />} />
-          <Route path="/valuations" element={<ValuationCalcsPage />} />
-          <Route path="/auctions" element={<AuctionCalcsPage />} />
-          <Route path="/profiles" element={<CostProfilesPage />} />
+          <Route path="/" element={<StartPage />} />
+          <Route path="/vehicles" element={<CheckedVehiclesPage />} />
+          <Route path="/offers" element={<MarketOffersPage />} />
+          <Route path="/market" element={<MarketCheckPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

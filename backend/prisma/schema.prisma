@@ -7,131 +7,94 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ========== AUTO DOCELOWE ==========
-model TargetCar {
-  id        Int      @id @default(autoincrement())
-  make      String   @db.VarChar(100)
-  model     String   @db.VarChar(100)
-  year      Int
-  bodyType  String?  @db.VarChar(50)
-  fuelType  String?  @db.VarChar(50)
-  engineCapacity Float?
-  horsepower Int?
-  transmission String? @db.VarChar(50)
-  color     String?  @db.VarChar(50)
-  maxBudget Float?
-  notes     String?  @db.Text
-  isArchived Boolean @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  offers            ComparisonOffer[]
-  valuationCalcs    ValuationCalc[]
-  auctionCalcs      AuctionCalc[]
-}
-
-// ========== OFERTA PORÓWNAWCZA ==========
-model ComparisonOffer {
-  id          Int      @id @default(autoincrement())
-  targetCarId Int
-  targetCar   TargetCar @relation(fields: [targetCarId], references: [id])
-  source      String   @db.VarChar(200)
-  sourceUrl   String?  @db.VarChar(500)
-  price       Float
-  currency    String   @default("PLN") @db.VarChar(10)
-  mileage     Int?
-  year        Int?
-  condition   String?  @db.VarChar(50)
-  location    String?  @db.VarChar(200)
-  notes       String?  @db.Text
-  isArchived  Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-// ========== NOTATKA O SILNIKU ==========
-model EngineNote {
-  id           Int      @id @default(autoincrement())
-  engineCode   String   @db.VarChar(50)
-  engineFamily String?  @db.VarChar(100)
-  fuelType     String?  @db.VarChar(50)
-  displacement Float?
-  horsepower   Int?
-  torque       Int?
-  knownIssues  String?  @db.Text
-  maintenance  String?  @db.Text
-  reliability  Int?
-  notes        String?  @db.Text
-  isArchived   Boolean  @default(false)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-}
-
-// ========== KALKULACJA WYCENY ==========
-model ValuationCalc {
-  id            Int      @id @default(autoincrement())
-  targetCarId   Int?
-  targetCar     TargetCar? @relation(fields: [targetCarId], references: [id])
-  name          String   @db.VarChar(200)
-  basePrice     Float
-  repairCost    Float    @default(0)
-  paintCost     Float    @default(0)
-  partsCost     Float    @default(0)
-  transportCost Float    @default(0)
-  otherCosts    Float    @default(0)
-  totalCost     Float    @default(0)
-  estimatedValue Float   @default(0)
-  profit        Float    @default(0)
-  costProfileId Int?
-  costProfile   CostProfile? @relation(fields: [costProfileId], references: [id])
-  notes         String?  @db.Text
-  isArchived    Boolean  @default(false)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-}
-
-// ========== KALKULACJA LICYTACJI ==========
-model AuctionCalc {
+// ========== SPRAWDZANY POJAZD ==========
+model CheckedVehicle {
   id              Int      @id @default(autoincrement())
-  targetCarId     Int?
-  targetCar       TargetCar? @relation(fields: [targetCarId], references: [id])
-  name            String   @db.VarChar(200)
-  startingPrice   Float
-  maxBid          Float
-  auctionFee      Float    @default(0)
-  buyerPremium    Float    @default(0)
-  transportCost   Float    @default(0)
-  repairEstimate  Float    @default(0)
-  otherCosts      Float    @default(0)
-  totalCost       Float    @default(0)
-  estimatedValue  Float    @default(0)
-  potentialProfit Float    @default(0)
-  costProfileId   Int?
-  costProfile     CostProfile? @relation(fields: [costProfileId], references: [id])
+  vehicleType     String   @db.VarChar(50)  // Auto, Motocykl, Bus, Ciezarowy, Kamper
+  make            String   @db.VarChar(100)
+  model           String   @db.VarChar(100)
+  year            Int
+  bodyType        String?  @db.VarChar(50)
+  fuelType        String?  @db.VarChar(50)
+  color           String?  @db.VarChar(50)
+  transmission    String?  @db.VarChar(50)  // Manualna, Automatyczna, Zautomatyzowana (N/D dla motocykli)
+  engineCode      String?  @db.VarChar(100)
+  engineFamily    String?  @db.VarChar(100)
+  engineCapacity  Float?
+  horsepowerKM    Float?
+  horsepowerKW    Float?
+  torque          Float?
+  pricePLN        Float?
+  priceUSD        Float?
+  priceEUR        Float?
+  currency        String   @default("PLN") @db.VarChar(10)
+  mileageKm       Float?
+  mileageMi       Float?
+  accidentFree    Boolean  @default(true)
+  damaged         Boolean  @default(false)
+  damageDescription String? @db.Text
+  continent       String?  @db.VarChar(100)
+  country         String?  @db.VarChar(100)
+  notes           String?  @db.Text
+  isArchived      Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  marketOffers    MarketOffer[]
+}
+
+// ========== OFERTA RYNKOWA ==========
+model MarketOffer {
+  id              Int      @id @default(autoincrement())
+  checkedVehicleId Int?
+  checkedVehicle  CheckedVehicle? @relation(fields: [checkedVehicleId], references: [id])
+  vehicleType     String   @db.VarChar(50)
+  make            String   @db.VarChar(100)
+  model           String   @db.VarChar(100)
+  year            Int
+  bodyType        String?  @db.VarChar(50)
+  fuelType        String?  @db.VarChar(50)
+  color           String?  @db.VarChar(50)
+  transmission    String?  @db.VarChar(50)
+  engineCode      String?  @db.VarChar(100)
+  engineFamily    String?  @db.VarChar(100)
+  engineCapacity  Float?
+  horsepowerKM    Float?
+  horsepowerKW    Float?
+  torque          Float?
+  pricePLN        Float?
+  priceUSD        Float?
+  priceEUR        Float?
+  currency        String   @default("PLN") @db.VarChar(10)
+  mileageKm       Float?
+  mileageMi       Float?
+  accidentFree    Boolean  @default(true)
+  damaged         Boolean  @default(false)
+  damageDescription String? @db.Text
+  continent       String?  @db.VarChar(100)
+  country         String?  @db.VarChar(100)
+  offerUrl        String?  @db.VarChar(500)
+  equipment       String?  @db.Text
   notes           String?  @db.Text
   isArchived      Boolean  @default(false)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
 
-// ========== PROFIL KOSZTOWY (USTAWIENIA) ==========
-model CostProfile {
-  id                Int      @id @default(autoincrement())
-  name              String   @db.VarChar(200)
-  defaultRepairRate Float    @default(0)
-  defaultPaintRate  Float    @default(0)
-  defaultTransport  Float    @default(0)
-  defaultAuctionFee Float    @default(0)
-  defaultBuyerPremium Float  @default(0)
-  taxRate           Float    @default(0)
-  marginTarget      Float    @default(0)
-  currency          String   @default("PLN") @db.VarChar(10)
-  notes             String?  @db.Text
-  isDefault         Boolean  @default(false)
-  isArchived        Boolean  @default(false)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-
-  valuationCalcs ValuationCalc[]
-  auctionCalcs   AuctionCalc[]
+// ========== USTAWIENIA ==========
+model Settings {
+  id                    Int      @id @default(autoincrement())
+  exciseDutySmall       Float    @default(3.1)   // akcyza <= 2.0l (%)
+  exciseDutyLarge       Float    @default(18.6)  // akcyza > 2.0l (%)
+  customsDuty           Float    @default(10)    // clo (%)
+  incomeTax             Float    @default(19)    // podatek dochodowy (%)
+  vat                   Float    @default(23)    // VAT (%)
+  estimatedRepairCost   Float    @default(0)     // szacowane koszty napraw
+  desiredMargin         Float    @default(0)     // pozadana marza
+  transportCost         Float    @default(0)     // koszt transportu
+  registrationCost      Float    @default(0)     // koszt rejestracji
+  expertCost            Float    @default(0)     // koszt rzeczoznawcy
+  isArchived            Boolean  @default(false)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 }

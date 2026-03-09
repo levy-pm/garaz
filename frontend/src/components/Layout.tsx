@@ -1,43 +1,38 @@
 import { NavLink, Outlet } from 'react-router-dom';
 
 const navItems = [
-  { to: '/', label: 'Auta docelowe' },
-  { to: '/offers', label: 'Oferty' },
-  { to: '/engines', label: 'Silniki' },
-  { to: '/valuations', label: 'Wyceny' },
-  { to: '/auctions', label: 'Licytacje' },
-  { to: '/profiles', label: 'Profile kosztowe' },
+  { to: '/', label: 'Start', icon: '⌂' },
+  { to: '/vehicles', label: 'Sprawdzane pojazdy', icon: '◉' },
+  { to: '/offers', label: 'Oferty rynkowe', icon: '≡' },
+  { to: '/market', label: 'Sprawdź rynek', icon: '◈' },
+  { to: '/settings', label: 'Ustawienia', icon: '⚙' },
 ];
 
 export default function Layout() {
   return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
-      <nav style={{
-        width: 220,
-        background: '#1a1a2e',
-        color: '#fff',
-        padding: '20px 0',
-        flexShrink: 0,
-      }}>
-        <h2 style={{ textAlign: 'center', margin: '0 0 24px', fontSize: 20 }}>Garaz</h2>
-        {navItems.map(item => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            style={({ isActive }) => ({
-              display: 'block',
-              padding: '10px 20px',
-              color: isActive ? '#e94560' : '#ccc',
-              textDecoration: 'none',
-              fontWeight: isActive ? 700 : 400,
-              borderLeft: isActive ? '3px solid #e94560' : '3px solid transparent',
-            })}
-          >
-            {item.label}
-          </NavLink>
-        ))}
+    <div className="app-layout">
+      <nav className="sidebar">
+        <div className="sidebar-logo">
+          Garaz <span>v2.0</span>
+        </div>
+        <div className="sidebar-nav">
+          {navItems.map(item => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.to === '/'}
+              className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+            >
+              <span style={{ fontSize: 16, width: 20, textAlign: 'center' }}>{item.icon}</span>
+              {item.label}
+            </NavLink>
+          ))}
+        </div>
+        <div style={{ padding: '16px 24px', borderTop: '1px solid var(--border-color)', fontSize: 11, color: 'var(--text-muted)' }}>
+          Narzędzie analityczne
+        </div>
       </nav>
-      <main style={{ flex: 1, padding: 24, background: '#f5f5f5' }}>
+      <main className="main-content">
         <Outlet />
       </main>
     </div>

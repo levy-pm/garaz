@@ -1,9 +1,9 @@
 import api from './client';
 
-// Generic CRUD factory
+// Generic CRUD factory with pagination support
 function createCrud<T>(endpoint: string) {
   return {
-    getAll: (params?: Record<string, any>) => api.get<T[]>(endpoint, { params }).then(r => r.data),
+    getAll: (params?: Record<string, any>) => api.get<{ items: T[]; total: number; page: number; limit: number; totalPages: number }>(endpoint, { params }).then(r => r.data),
     getOne: (id: number) => api.get<T>(`${endpoint}/${id}`).then(r => r.data),
     create: (data: Partial<T>) => api.post<T>(endpoint, data).then(r => r.data),
     update: (id: number, data: Partial<T>) => api.put<T>(`${endpoint}/${id}`, data).then(r => r.data),
@@ -11,118 +11,158 @@ function createCrud<T>(endpoint: string) {
   };
 }
 
-export interface TargetCar {
+export interface CheckedVehicle {
   id: number;
+  vehicleType: string;
   make: string;
   model: string;
   year: number;
   bodyType?: string;
   fuelType?: string;
-  engineCapacity?: number;
-  horsepower?: number;
-  transmission?: string;
   color?: string;
-  maxBudget?: number;
+  transmission?: string;
+  engineCode?: string;
+  engineFamily?: string;
+  engineCapacity?: number;
+  horsepowerKM?: number;
+  horsepowerKW?: number;
+  torque?: number;
+  pricePLN?: number;
+  priceUSD?: number;
+  priceEUR?: number;
+  currency: string;
+  mileageKm?: number;
+  mileageMi?: number;
+  accidentFree: boolean;
+  damaged: boolean;
+  damageDescription?: string;
+  continent?: string;
+  country?: string;
+  notes?: string;
+  isArchived: boolean;
+  createdAt: string;
+  updatedAt: string;
+  marketOffers?: MarketOffer[];
+}
+
+export interface MarketOffer {
+  id: number;
+  checkedVehicleId?: number;
+  checkedVehicle?: CheckedVehicle;
+  vehicleType: string;
+  make: string;
+  model: string;
+  year: number;
+  bodyType?: string;
+  fuelType?: string;
+  color?: string;
+  transmission?: string;
+  engineCode?: string;
+  engineFamily?: string;
+  engineCapacity?: number;
+  horsepowerKM?: number;
+  horsepowerKW?: number;
+  torque?: number;
+  pricePLN?: number;
+  priceUSD?: number;
+  priceEUR?: number;
+  currency: string;
+  mileageKm?: number;
+  mileageMi?: number;
+  accidentFree: boolean;
+  damaged: boolean;
+  damageDescription?: string;
+  continent?: string;
+  country?: string;
+  offerUrl?: string;
+  equipment?: string;
   notes?: string;
   isArchived: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface ComparisonOffer {
+export interface Settings {
   id: number;
-  targetCarId: number;
-  targetCar?: TargetCar;
-  source: string;
-  sourceUrl?: string;
-  price: number;
-  currency: string;
-  mileage?: number;
-  year?: number;
-  condition?: string;
-  location?: string;
-  notes?: string;
-  isArchived: boolean;
-  createdAt: string;
-}
-
-export interface EngineNote {
-  id: number;
-  engineCode: string;
-  engineFamily?: string;
-  fuelType?: string;
-  displacement?: number;
-  horsepower?: number;
-  torque?: number;
-  knownIssues?: string;
-  maintenance?: string;
-  reliability?: number;
-  notes?: string;
-  isArchived: boolean;
-  createdAt: string;
-}
-
-export interface ValuationCalc {
-  id: number;
-  targetCarId?: number;
-  targetCar?: TargetCar;
-  name: string;
-  basePrice: number;
-  repairCost: number;
-  paintCost: number;
-  partsCost: number;
+  exciseDutySmall: number;
+  exciseDutyLarge: number;
+  customsDuty: number;
+  incomeTax: number;
+  vat: number;
+  estimatedRepairCost: number;
+  desiredMargin: number;
   transportCost: number;
-  otherCosts: number;
-  totalCost: number;
-  estimatedValue: number;
-  profit: number;
-  costProfileId?: number;
-  notes?: string;
-  isArchived: boolean;
+  registrationCost: number;
+  expertCost: number;
   createdAt: string;
+  updatedAt: string;
 }
 
-export interface AuctionCalc {
-  id: number;
-  targetCarId?: number;
-  targetCar?: TargetCar;
-  name: string;
-  startingPrice: number;
-  maxBid: number;
-  auctionFee: number;
-  buyerPremium: number;
-  transportCost: number;
-  repairEstimate: number;
-  otherCosts: number;
-  totalCost: number;
-  estimatedValue: number;
-  potentialProfit: number;
-  costProfileId?: number;
-  notes?: string;
-  isArchived: boolean;
-  createdAt: string;
+export interface MarketStats {
+  yearStats: {
+    count: number;
+    avgPrice: number | null;
+    medianPrice: number | null;
+    avgMileage: number | null;
+    medianMileage: number | null;
+  };
+  modelStats: {
+    count: number;
+    avgPrice: number | null;
+    medianPrice: number | null;
+    avgMileage: number | null;
+    medianMileage: number | null;
+  };
+  proposedPrice: number | null;
 }
 
-export interface CostProfile {
-  id: number;
-  name: string;
-  defaultRepairRate: number;
-  defaultPaintRate: number;
-  defaultTransport: number;
-  defaultAuctionFee: number;
-  defaultBuyerPremium: number;
-  taxRate: number;
-  marginTarget: number;
-  currency: string;
-  notes?: string;
-  isDefault: boolean;
-  isArchived: boolean;
-  createdAt: string;
+export interface MarketTrend {
+  month: string;
+  avgPrice: number | null;
+  avgMileage: number | null;
+  accidentFreeRate: number | null;
+  offerCount: number;
 }
 
-export const targetCarsApi = createCrud<TargetCar>('/target-cars');
-export const comparisonOffersApi = createCrud<ComparisonOffer>('/comparison-offers');
-export const engineNotesApi = createCrud<EngineNote>('/engine-notes');
-export const valuationCalcsApi = createCrud<ValuationCalc>('/valuation-calcs');
-export const auctionCalcsApi = createCrud<AuctionCalc>('/auction-calcs');
-export const costProfilesApi = createCrud<CostProfile>('/cost-profiles');
+export interface MarketAnalysis {
+  vehicle: { id: number; make: string; model: string; year: number };
+  trends: MarketTrend[];
+  totalOffers: number;
+}
+
+export interface ProfitabilityResult {
+  type: string;
+  avgMarketPrice: number;
+  purchasePrice: number;
+  totalCosts: number;
+  breakdown: Record<string, number>;
+  incomeTax: number;
+  desiredMargin: number;
+  totalWithTaxAndMargin: number;
+  maxBuyPrice: number;
+  estimatedProfit: number;
+  profitable: boolean;
+}
+
+export const checkedVehiclesApi = createCrud<CheckedVehicle>('/checked-vehicles');
+export const marketOffersApi = createCrud<MarketOffer>('/market-offers');
+
+export const settingsApi = {
+  get: () => api.get<Settings>('/settings').then(r => r.data),
+  update: (id: number, data: Partial<Settings>) => api.put<Settings>(`/settings/${id}`, data).then(r => r.data),
+};
+
+export const marketStatsApi = {
+  getForVehicle: (vehicleId: number) =>
+    api.get<MarketStats>(`/checked-vehicles/${vehicleId}/market-stats`).then(r => r.data),
+};
+
+export const marketAnalysisApi = {
+  get: (vehicleId: number, dateFrom?: string, dateTo?: string) =>
+    api.get<MarketAnalysis>('/market-analysis', { params: { vehicleId, dateFrom, dateTo } }).then(r => r.data),
+};
+
+export const profitabilityApi = {
+  calculate: (data: { vehicleId: number; type: string; purchasePrice: number; purchaseCurrency: string; isImport: boolean }) =>
+    api.post<ProfitabilityResult>('/profitability/calculate', data).then(r => r.data),
+};

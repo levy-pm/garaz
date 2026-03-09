@@ -3,12 +3,11 @@ import cors from 'cors';
 import path from 'path';
 import fs from 'fs';
 import { PrismaClient } from '@prisma/client';
-import targetCarRoutes from './routes/targetCar';
-import comparisonOfferRoutes from './routes/comparisonOffer';
-import engineNoteRoutes from './routes/engineNote';
-import valuationCalcRoutes from './routes/valuationCalc';
-import auctionCalcRoutes from './routes/auctionCalc';
-import costProfileRoutes from './routes/costProfile';
+import checkedVehicleRoutes from './routes/checkedVehicle';
+import marketOfferRoutes from './routes/marketOffer';
+import settingsRoutes from './routes/settings';
+import marketAnalysisRoutes from './routes/marketAnalysis';
+import profitabilityRoutes from './routes/profitability';
 
 const envPath = path.resolve(__dirname, '../.env');
 
@@ -44,12 +43,11 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
-app.use('/api/target-cars', targetCarRoutes);
-app.use('/api/comparison-offers', comparisonOfferRoutes);
-app.use('/api/engine-notes', engineNoteRoutes);
-app.use('/api/valuation-calcs', valuationCalcRoutes);
-app.use('/api/auction-calcs', auctionCalcRoutes);
-app.use('/api/cost-profiles', costProfileRoutes);
+app.use('/api/checked-vehicles', checkedVehicleRoutes);
+app.use('/api/market-offers', marketOfferRoutes);
+app.use('/api/settings', settingsRoutes);
+app.use('/api/market-analysis', marketAnalysisRoutes);
+app.use('/api/profitability', profitabilityRoutes);
 
 // Health check
 app.get('/api/health', (_req, res) => {
