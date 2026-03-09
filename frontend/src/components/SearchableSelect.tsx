@@ -15,6 +15,13 @@ export default function SearchableSelect({ options, value, onChange, placeholder
   const ref = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const commitQuery = () => {
+    const nextValue = query.trim();
+    if (nextValue && nextValue !== value) {
+      onChange(nextValue);
+    }
+  };
+
   const filtered = query
     ? options.filter(o => o.toLowerCase().includes(query.toLowerCase()))
     : options;
@@ -23,10 +30,7 @@ export default function SearchableSelect({ options, value, onChange, placeholder
     const handleClick = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) {
         setOpen(false);
-        // When closing by clicking outside, commit the typed query as free text
-        if (query && query !== value) {
-          onChange(query);
-        }
+        commitQuery();
         setQuery('');
       }
     };
@@ -82,12 +86,7 @@ export default function SearchableSelect({ options, value, onChange, placeholder
           setQuery('');
         }}
         onBlur={() => {
-          // Commit free text on blur (small delay so click-select fires first)
-          setTimeout(() => {
-            if (query && query !== value) {
-              onChange(query);
-            }
-          }, 150);
+          commitQuery();
         }}
         onKeyDown={handleKeyDown}
       />
