@@ -20,6 +20,7 @@ model CheckedVehicle {
   fuelType          String?  @db.VarChar(50)
   color             String?  @db.VarChar(50)
   transmission      String?  @db.VarChar(50)  // Manualna, Automatyczna, Zautomatyzowana (N/D dla motocykli)
+  driveType         String?  @db.VarChar(10)  // AWD, RWD, FWD
   engineCode        String?  @db.VarChar(100)
   engineFamily      String?  @db.VarChar(100)
   engineCapacity    Float?
@@ -60,6 +61,7 @@ model MarketOffer {
   fuelType        String?  @db.VarChar(50)
   color           String?  @db.VarChar(50)
   transmission    String?  @db.VarChar(50)
+  driveType       String?  @db.VarChar(10)  // AWD, RWD, FWD
   engineCode      String?  @db.VarChar(100)
   engineFamily    String?  @db.VarChar(100)
   engineCapacity  Float?

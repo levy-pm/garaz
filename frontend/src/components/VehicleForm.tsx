@@ -14,6 +14,7 @@ export interface VehicleFormData {
   fuelType: string;
   color: string;
   transmission: string;
+  driveType: string;
   engineCode: string;
   engineFamily: string;
   engineCapacity: number | '';
@@ -42,6 +43,7 @@ const bodyTypes = ['Sedan', 'Kombi', 'Kabriolet', 'Van', 'SUV', 'Dostawczy', 'Co
 const fuelTypes = ['Benzyna', 'Diesel', 'PHEV Hybryda-benzyna', 'MHEV Hybryda-benzyna', 'PHEV Hybryda-diesel', 'MHEV Hybryda-diesel', 'Wodór', 'Elektryczny', 'Benzyna-gaz'];
 const colors = ['Czarny', 'Biały', 'Niebieski', 'Czerwony', 'Szary', 'Żółty', 'Srebrny', 'Zielony', 'Pomarańczowy', 'Kremowy', 'Brązowy', 'Fioletowy', 'Granatowy'];
 const transmissions = ['Manualna', 'Automatyczna', 'Zautomatyzowana'];
+const driveTypes = ['FWD', 'RWD', 'AWD'];
 
 const continents: Record<string, string[]> = {
   'Europa': ['Polska', 'Niemcy', 'Francja', 'Włochy', 'Hiszpania', 'Holandia', 'Belgia', 'Austria', 'Szwajcaria', 'Czechy', 'Słowacja', 'Wielka Brytania', 'Szwecja', 'Norwegia', 'Dania', 'Finlandia', 'Rumunia', 'Węgry', 'Portugalia', 'Litwa', 'Łotwa', 'Estonia', 'Chorwacja', 'Bułgaria', 'Ukraina'],
@@ -146,6 +148,7 @@ export default function VehicleForm({ defaultValues, onSubmit, onCancel, showOff
     if (!cleaned.country) cleaned.country = null;
     if (!cleaned.version) cleaned.version = null;
     if (!cleaned.equipmentVersion) cleaned.equipmentVersion = null;
+    if (!cleaned.driveType) cleaned.driveType = null;
     onSubmit(cleaned);
   };
 
@@ -232,6 +235,15 @@ export default function VehicleForm({ defaultValues, onSubmit, onCancel, showOff
             <select className="form-select" {...register('transmission')}>
               <option value="">Wybierz</option>
               {transmissions.map(t => <option key={t} value={t}>{t}</option>)}
+            </select>
+          </div>
+        )}
+        {!isMotorcycle && (
+          <div className="form-group">
+            <label className="form-label">Napęd</label>
+            <select className="form-select" {...register('driveType')}>
+              <option value="">Wybierz</option>
+              {driveTypes.map(t => <option key={t} value={t}>{t}</option>)}
             </select>
           </div>
         )}

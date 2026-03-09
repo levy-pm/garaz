@@ -23,6 +23,7 @@ export interface CheckedVehicle {
   fuelType?: string;
   color?: string;
   transmission?: string;
+  driveType?: string;
   engineCode?: string;
   engineFamily?: string;
   engineCapacity?: number;
@@ -61,6 +62,7 @@ export interface MarketOffer {
   fuelType?: string;
   color?: string;
   transmission?: string;
+  driveType?: string;
   engineCode?: string;
   engineFamily?: string;
   engineCapacity?: number;
