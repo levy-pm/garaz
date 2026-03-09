@@ -12,47 +12,51 @@ model CheckedVehicle {
   id              Int      @id @default(autoincrement())
   vehicleType     String   @db.VarChar(50)  // Auto, Motocykl, Bus, Ciezarowy, Kamper
   make            String   @db.VarChar(100)
-  model           String   @db.VarChar(100)
-  year            Int
-  bodyType        String?  @db.VarChar(50)
-  fuelType        String?  @db.VarChar(50)
-  color           String?  @db.VarChar(50)
-  transmission    String?  @db.VarChar(50)  // Manualna, Automatyczna, Zautomatyzowana (N/D dla motocykli)
-  engineCode      String?  @db.VarChar(100)
-  engineFamily    String?  @db.VarChar(100)
-  engineCapacity  Float?
-  horsepowerKM    Float?
-  horsepowerKW    Float?
-  torque          Float?
-  pricePLN        Float?
-  priceUSD        Float?
-  priceEUR        Float?
-  currency        String   @default("PLN") @db.VarChar(10)
-  mileageKm       Float?
-  mileageMi       Float?
-  accidentFree    Boolean  @default(true)
-  damaged         Boolean  @default(false)
-  damageDescription String? @db.Text
-  continent       String?  @db.VarChar(100)
-  country         String?  @db.VarChar(100)
-  notes           String?  @db.Text
-  isArchived      Boolean  @default(false)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  model             String   @db.VarChar(100)
+  year              Int
+  version           String?  @db.VarChar(200)
+  equipmentVersion  String?  @db.VarChar(200)
+  bodyType          String?  @db.VarChar(50)
+  fuelType          String?  @db.VarChar(50)
+  color             String?  @db.VarChar(50)
+  transmission      String?  @db.VarChar(50)  // Manualna, Automatyczna, Zautomatyzowana (N/D dla motocykli)
+  engineCode        String?  @db.VarChar(100)
+  engineFamily      String?  @db.VarChar(100)
+  engineCapacity    Float?
+  horsepowerKM      Float?
+  horsepowerKW      Float?
+  torque            Float?
+  pricePLN          Float?
+  priceUSD          Float?
+  priceEUR          Float?
+  currency          String   @default("PLN") @db.VarChar(10)
+  mileageKm         Float?
+  mileageMi         Float?
+  accidentFree      Boolean  @default(true)
+  damaged           Boolean  @default(false)
+  damageDescription String?  @db.Text
+  continent         String?  @db.VarChar(100)
+  country           String?  @db.VarChar(100)
+  notes             String?  @db.Text
+  isArchived        Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
-  marketOffers    MarketOffer[]
+  marketOffers      MarketOffer[]
 }
 
 // ========== OFERTA RYNKOWA ==========
 model MarketOffer {
   id              Int      @id @default(autoincrement())
   checkedVehicleId Int?
-  checkedVehicle  CheckedVehicle? @relation(fields: [checkedVehicleId], references: [id])
-  vehicleType     String   @db.VarChar(50)
-  make            String   @db.VarChar(100)
-  model           String   @db.VarChar(100)
-  year            Int
-  bodyType        String?  @db.VarChar(50)
+  checkedVehicle    CheckedVehicle? @relation(fields: [checkedVehicleId], references: [id])
+  vehicleType       String   @db.VarChar(50)
+  make              String   @db.VarChar(100)
+  model             String   @db.VarChar(100)
+  year              Int
+  version           String?  @db.VarChar(200)
+  equipmentVersion  String?  @db.VarChar(200)
+  bodyType          String?  @db.VarChar(50)
   fuelType        String?  @db.VarChar(50)
   color           String?  @db.VarChar(50)
   transmission    String?  @db.VarChar(50)
@@ -79,6 +83,23 @@ model MarketOffer {
   isArchived      Boolean  @default(false)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+}
+
+// ========== KATALOG MAREK ==========
+model CatalogMake {
+  id     Int    @id @default(autoincrement())
+  name   String @unique @db.VarChar(100)
+  models CatalogModel[]
+}
+
+// ========== KATALOG MODELI ==========
+model CatalogModel {
+  id      Int         @id @default(autoincrement())
+  name    String      @db.VarChar(100)
+  makeId  Int
+  make    CatalogMake @relation(fields: [makeId], references: [id])
+
+  @@unique([makeId, name])
 }
 
 // ========== USTAWIENIA ==========

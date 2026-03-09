@@ -17,6 +17,8 @@ export interface CheckedVehicle {
   make: string;
   model: string;
   year: number;
+  version?: string;
+  equipmentVersion?: string;
   bodyType?: string;
   fuelType?: string;
   color?: string;
@@ -53,6 +55,8 @@ export interface MarketOffer {
   make: string;
   model: string;
   year: number;
+  version?: string;
+  equipmentVersion?: string;
   bodyType?: string;
   fuelType?: string;
   color?: string;
@@ -165,4 +169,13 @@ export const marketAnalysisApi = {
 export const profitabilityApi = {
   calculate: (data: { vehicleId: number; type: string; purchasePrice: number; purchaseCurrency: string; isImport: boolean }) =>
     api.post<ProfitabilityResult>('/profitability/calculate', data).then(r => r.data),
+};
+
+export const authApi = {
+  login: (login: string, password: string) =>
+    api.post<{ success: boolean; message?: string }>('/auth/login', { login, password }).then(r => r.data),
+  logout: () =>
+    api.post('/auth/logout').then(r => r.data),
+  session: () =>
+    api.get<{ authenticated: boolean }>('/auth/session').then(r => r.data),
 };

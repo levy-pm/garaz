@@ -1,11 +1,15 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm, type UseFormReturn } from 'react-hook-form';
+import SearchableSelect from './SearchableSelect';
+import api from '../api/client';
 
 export interface VehicleFormData {
   vehicleType: string;
   make: string;
   model: string;
   year: number;
+  version: string;
+  equipmentVersion: string;
   bodyType: string;
   fuelType: string;
   color: string;
@@ -70,6 +74,8 @@ export default function VehicleForm({ defaultValues, onSubmit, onCancel, showOff
     defaultValues: {
       vehicleType: 'Auto',
       currency: 'PLN',
+      version: '',
+      equipmentVersion: '',
       ...defaultValues,
       accidentFree: defaultValues?.accidentFree !== undefined ? String(defaultValues.accidentFree) : 'true',
       damaged: defaultValues?.damaged !== undefined ? String(defaultValues.damaged) : 'false',
@@ -81,7 +87,40 @@ export default function VehicleForm({ defaultValues, onSubmit, onCancel, showOff
   const vehicleType = watch('vehicleType');
   const damaged = watch('damaged');
   const continent = watch('continent');
+  const make = watch('make');
   const isMotorcycle = vehicleType === 'Motocykl';
+
+  // Catalog data from backend
+  const [catalogMakes, setCatalogMakes] = useState<string[]>([]);
+  const [catalogModels, setCatalogModels] = useState<string[]>([]);
+
+  // Load makes from catalog
+  useEffect(() => {
+    api.get<{ id: number; name: string }[]>('/catalog/makes')
+      .then(res => setCatalogMakes(res.data.map(m => m.name)))
+      .catch(() => {});
+  }, []);
+
+  // Load models when make changes
+  useEffect(() => {
+    if (!make) {
+      setCatalogModels([]);
+      return;
+    }
+    api.get<{ id: number; name: string }[]>('/catalog/makes')
+      .then(res => {
+        const found = res.data.find(m => m.name === make);
+        if (found) {
+          return api.get<{ id: number; name: string }[]>('/catalog/models', { params: { makeId: found.id } });
+        }
+        return null;
+      })
+      .then(res => {
+        if (res) setCatalogModels(res.data.map(m => m.name));
+        else setCatalogModels([]);
+      })
+      .catch(() => setCatalogModels([]));
+  }, [make]);
 
   // KM <-> kW auto-conversion
   useAutoConvert(form, 'horsepowerKM', 'horsepowerKW', (km) => Math.round(km / KW_TO_KM * 100) / 100);
@@ -115,6 +154,8 @@ export default function VehicleForm({ defaultValues, onSubmit, onCancel, showOff
     if (!cleaned.damageDescription) cleaned.damageDescription = null;
     if (!cleaned.continent) cleaned.continent = null;
     if (!cleaned.country) cleaned.country = null;
+    if (!cleaned.version) cleaned.version = null;
+    if (!cleaned.equipmentVersion) cleaned.equipmentVersion = null;
     onSubmit(cleaned);
   };
 
@@ -129,12 +170,28 @@ export default function VehicleForm({ defaultValues, onSubmit, onCancel, showOff
         </div>
         <div className="form-group">
           <label className="form-label">Marka *</label>
-          <input className="form-input" {...register('make', { required: 'Marka jest wymagana' })} placeholder="np. BMW" />
+          <SearchableSelect
+            options={catalogMakes}
+            value={make || ''}
+            onChange={(val) => {
+              setValue('make', val, { shouldValidate: true });
+              setValue('model', '');
+            }}
+            placeholder="Szukaj marki..."
+          />
+          <input type="hidden" {...register('make', { required: 'Marka jest wymagana' })} />
           {errors.make && <span className="form-error">{errors.make.message}</span>}
         </div>
         <div className="form-group">
           <label className="form-label">Model *</label>
-          <input className="form-input" {...register('model', { required: 'Model jest wymagany' })} placeholder="np. 320d" />
+          <SearchableSelect
+            options={catalogModels}
+            value={watch('model') || ''}
+            onChange={(val) => setValue('model', val, { shouldValidate: true })}
+            placeholder={make ? 'Szukaj modelu...' : 'Najpierw wybierz markę'}
+            disabled={!make}
+          />
+          <input type="hidden" {...register('model', { required: 'Model jest wymagany' })} />
           {errors.model && <span className="form-error">{errors.model.message}</span>}
         </div>
         <div className="form-group">
@@ -143,6 +200,17 @@ export default function VehicleForm({ defaultValues, onSubmit, onCancel, showOff
             <option value="">Wybierz</option>
             {years.map(y => <option key={y} value={y}>{y}</option>)}
           </select>
+        </div>
+      </div>
+
+      <div className="form-row">
+        <div className="form-group">
+          <label className="form-label">Wersja</label>
+          <input className="form-input" {...register('version')} placeholder="np. xDrive, M Sport, GTI..." />
+        </div>
+        <div className="form-group">
+          <label className="form-label">Wersja wyposażenia</label>
+          <input className="form-input" {...register('equipmentVersion')} placeholder="np. Comfort, Luxury, Sport Line..." />
         </div>
       </div>
 
@@ -189,49 +257,76 @@ export default function VehicleForm({ defaultValues, onSubmit, onCancel, showOff
           <input className="form-input" {...register('engineFamily')} placeholder="np. N47" />
         </div>
         <div className="form-group">
-          <label className="form-label">Pojemność (l)</label>
-          <input className="form-input" type="number" step="0.1" {...register('engineCapacity')} placeholder="np. 2.0" />
+          <label className="form-label">Pojemność</label>
+          <div className="input-with-unit">
+            <input className="form-input" type="number" step="0.1" {...register('engineCapacity')} placeholder="np. 2.0" />
+            <span className="input-unit">l</span>
+          </div>
         </div>
         <div className="form-group">
-          <label className="form-label">Moment obrotowy (Nm)</label>
-          <input className="form-input" type="number" {...register('torque')} placeholder="np. 350" />
-        </div>
-      </div>
-
-      <div className="form-row">
-        <div className="form-group">
-          <label className="form-label">Moc (KM)</label>
-          <input className="form-input" type="number" step="0.01" {...register('horsepowerKM')} placeholder="np. 184" />
-        </div>
-        <div className="form-group">
-          <label className="form-label">Moc (kW)</label>
-          <input className="form-input" type="number" step="0.01" {...register('horsepowerKW')} placeholder="np. 135" />
+          <label className="form-label">Moment obrotowy</label>
+          <div className="input-with-unit">
+            <input className="form-input" type="number" {...register('torque')} placeholder="np. 350" />
+            <span className="input-unit">Nm</span>
+          </div>
         </div>
       </div>
 
       <div className="form-row">
         <div className="form-group">
-          <label className="form-label">Cena (PLN)</label>
-          <input className="form-input" type="number" {...register('pricePLN')} placeholder="Cena w PLN" />
+          <label className="form-label">Moc</label>
+          <div className="input-with-unit">
+            <input className="form-input" type="number" step="0.01" {...register('horsepowerKM')} placeholder="np. 184" />
+            <span className="input-unit">KM</span>
+          </div>
         </div>
         <div className="form-group">
-          <label className="form-label">Cena (EUR)</label>
-          <input className="form-input" type="number" {...register('priceEUR')} placeholder="Cena w EUR" />
-        </div>
-        <div className="form-group">
-          <label className="form-label">Cena (USD)</label>
-          <input className="form-input" type="number" {...register('priceUSD')} placeholder="Cena w USD" />
+          <label className="form-label">Moc</label>
+          <div className="input-with-unit">
+            <input className="form-input" type="number" step="0.01" {...register('horsepowerKW')} placeholder="np. 135" />
+            <span className="input-unit">kW</span>
+          </div>
         </div>
       </div>
 
       <div className="form-row">
         <div className="form-group">
-          <label className="form-label">Przebieg (km)</label>
-          <input className="form-input" type="number" {...register('mileageKm')} placeholder="km" />
+          <label className="form-label">Cena</label>
+          <div className="input-with-unit">
+            <input className="form-input" type="number" {...register('pricePLN')} placeholder="Cena" />
+            <span className="input-unit">PLN</span>
+          </div>
         </div>
         <div className="form-group">
-          <label className="form-label">Przebieg (mi)</label>
-          <input className="form-input" type="number" {...register('mileageMi')} placeholder="mi" />
+          <label className="form-label">Cena</label>
+          <div className="input-with-unit">
+            <input className="form-input" type="number" {...register('priceEUR')} placeholder="Cena" />
+            <span className="input-unit">EUR</span>
+          </div>
+        </div>
+        <div className="form-group">
+          <label className="form-label">Cena</label>
+          <div className="input-with-unit">
+            <input className="form-input" type="number" {...register('priceUSD')} placeholder="Cena" />
+            <span className="input-unit">USD</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="form-row">
+        <div className="form-group">
+          <label className="form-label">Przebieg</label>
+          <div className="input-with-unit">
+            <input className="form-input" type="number" {...register('mileageKm')} placeholder="Przebieg" />
+            <span className="input-unit">km</span>
+          </div>
+        </div>
+        <div className="form-group">
+          <label className="form-label">Przebieg</label>
+          <div className="input-with-unit">
+            <input className="form-input" type="number" {...register('mileageMi')} placeholder="Przebieg" />
+            <span className="input-unit">mi</span>
+          </div>
         </div>
       </div>
 
