@@ -19,6 +19,7 @@ export default function CheckedVehiclesPage() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [marketStats, setMarketStats] = useState<Record<number, MarketStats>>({});
+  const [saveError, setSaveError] = useState('');
 
   // Profitability state
   const [profitVehicleId, setProfitVehicleId] = useState<number | null>(null);
@@ -50,21 +51,35 @@ export default function CheckedVehiclesPage() {
   useEffect(() => { load(); }, [load]);
 
   const handleCreate = async (data: any) => {
-    await checkedVehiclesApi.create(data);
-    setShowAddForm(false);
-    load();
+    setSaveError('');
+    try {
+      await checkedVehiclesApi.create(data);
+      setShowAddForm(false);
+      load();
+    } catch (err: any) {
+      setSaveError(err.response?.data?.error || 'Błąd zapisu pojazdu');
+    }
   };
 
   const handleUpdate = async (id: number, data: any) => {
-    await checkedVehiclesApi.update(id, data);
-    setEditingId(null);
-    load();
+    setSaveError('');
+    try {
+      await checkedVehiclesApi.update(id, data);
+      setEditingId(null);
+      load();
+    } catch (err: any) {
+      setSaveError(err.response?.data?.error || 'Błąd aktualizacji pojazdu');
+    }
   };
 
   const handleDelete = async (id: number) => {
     if (!confirm('Czy na pewno chcesz usunąć ten pojazd?')) return;
-    await checkedVehiclesApi.remove(id);
-    load();
+    try {
+      await checkedVehiclesApi.remove(id);
+      load();
+    } catch (err: any) {
+      setSaveError(err.response?.data?.error || 'Błąd usuwania pojazdu');
+    }
   };
 
   const handleCalcProfit = async (vehicleId: number) => {
@@ -89,6 +104,12 @@ export default function CheckedVehiclesPage() {
           {showAddForm ? 'Zamknij formularz' : '+ Dodaj pojazd'}
         </button>
       </div>
+
+      {saveError && (
+        <div style={{ background: 'var(--red-bg)', color: 'var(--red)', padding: '10px 16px', borderRadius: 'var(--radius)', marginBottom: 16, fontSize: 14 }}>
+          {saveError}
+        </div>
+      )}
 
       {showAddForm && (
         <div className="card" style={{ marginBottom: 24 }}>

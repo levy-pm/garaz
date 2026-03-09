@@ -17,6 +17,7 @@ export default function MarketOffersPage() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [saveError, setSaveError] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -34,22 +35,35 @@ export default function MarketOffersPage() {
   useEffect(() => { load(); }, [load]);
 
   const handleCreate = async (data: any) => {
-    await marketOffersApi.create(data);
-    setShowModal(false);
-    load();
+    setSaveError('');
+    try {
+      await marketOffersApi.create(data);
+      setShowModal(false);
+      load();
+    } catch (err: any) {
+      setSaveError(err.response?.data?.error || 'Błąd zapisu oferty');
+    }
   };
 
   const handleUpdate = async (id: number, data: any) => {
-    await marketOffersApi.update(id, data);
-    setEditingId(null);
-
-    load();
+    setSaveError('');
+    try {
+      await marketOffersApi.update(id, data);
+      setEditingId(null);
+      load();
+    } catch (err: any) {
+      setSaveError(err.response?.data?.error || 'Błąd aktualizacji oferty');
+    }
   };
 
   const handleDelete = async (id: number) => {
     if (!confirm('Czy na pewno chcesz usunąć tę ofertę?')) return;
-    await marketOffersApi.remove(id);
-    load();
+    try {
+      await marketOffersApi.remove(id);
+      load();
+    } catch (err: any) {
+      setSaveError(err.response?.data?.error || 'Błąd usuwania oferty');
+    }
   };
 
   return (
@@ -60,6 +74,12 @@ export default function MarketOffersPage() {
           + Dodaj ofertę
         </button>
       </div>
+
+      {saveError && (
+        <div style={{ background: 'var(--red-bg)', color: 'var(--red)', padding: '10px 16px', borderRadius: 'var(--radius)', marginBottom: 16, fontSize: 14 }}>
+          {saveError}
+        </div>
+      )}
 
       <div className="toolbar">
         <input

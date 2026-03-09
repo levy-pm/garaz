@@ -7,6 +7,25 @@ const router = Router();
 
 const currentYear = new Date().getFullYear();
 
+const allowedFields = [
+  'vehicleType', 'make', 'model', 'year', 'version', 'equipmentVersion',
+  'bodyType', 'fuelType', 'color', 'transmission', 'driveType',
+  'engineCode', 'engineFamily', 'engineCapacity',
+  'horsepowerKM', 'horsepowerKW', 'torque',
+  'pricePLN', 'priceUSD', 'priceEUR', 'currency',
+  'mileageKm', 'mileageMi',
+  'accidentFree', 'damaged', 'damageDescription',
+  'continent', 'country', 'notes', 'isArchived',
+];
+
+function pickAllowed(body: Record<string, any>): Record<string, any> {
+  const result: Record<string, any> = {};
+  for (const key of allowedFields) {
+    if (key in body) result[key] = body[key];
+  }
+  return result;
+}
+
 const vehicleValidation = [
   body('vehicleType').notEmpty().withMessage('Typ pojazdu jest wymagany'),
   body('make').notEmpty().withMessage('Marka jest wymagana'),
@@ -138,7 +157,7 @@ router.get('/:id/market-stats', async (req: Request, res: Response) => {
 // CREATE
 router.post('/', vehicleValidation, validate, async (req: Request, res: Response) => {
   try {
-    const vehicle = await prisma.checkedVehicle.create({ data: req.body });
+    const vehicle = await prisma.checkedVehicle.create({ data: pickAllowed(req.body) as any });
     res.status(201).json(vehicle);
   } catch (err) {
     res.status(500).json({ error: 'Błąd tworzenia pojazdu' });
@@ -150,7 +169,7 @@ router.put('/:id', vehicleValidation, validate, async (req: Request, res: Respon
   try {
     const vehicle = await prisma.checkedVehicle.update({
       where: { id: Number(req.params.id) },
-      data: req.body,
+      data: pickAllowed(req.body),
     });
     res.json(vehicle);
   } catch (err) {

@@ -7,6 +7,26 @@ const router = Router();
 
 const currentYear = new Date().getFullYear();
 
+const allowedFields = [
+  'vehicleType', 'make', 'model', 'year', 'version', 'equipmentVersion',
+  'bodyType', 'fuelType', 'color', 'transmission', 'driveType',
+  'engineCode', 'engineFamily', 'engineCapacity',
+  'horsepowerKM', 'horsepowerKW', 'torque',
+  'pricePLN', 'priceUSD', 'priceEUR', 'currency',
+  'mileageKm', 'mileageMi',
+  'accidentFree', 'damaged', 'damageDescription',
+  'continent', 'country', 'notes', 'isArchived',
+  'checkedVehicleId', 'offerUrl', 'equipment',
+];
+
+function pickAllowed(body: Record<string, any>): Record<string, any> {
+  const result: Record<string, any> = {};
+  for (const key of allowedFields) {
+    if (key in body) result[key] = body[key];
+  }
+  return result;
+}
+
 const offerValidation = [
   body('vehicleType').notEmpty().withMessage('Typ pojazdu jest wymagany'),
   body('make').notEmpty().withMessage('Marka jest wymagana'),
@@ -70,7 +90,7 @@ router.get('/:id', async (req: Request, res: Response) => {
 router.post('/', offerValidation, validate, async (req: Request, res: Response) => {
   try {
     const offer = await prisma.marketOffer.create({
-      data: req.body,
+      data: pickAllowed(req.body) as any,
       include: { checkedVehicle: true },
     });
     res.status(201).json(offer);
@@ -84,7 +104,7 @@ router.put('/:id', async (req: Request, res: Response) => {
   try {
     const offer = await prisma.marketOffer.update({
       where: { id: Number(req.params.id) },
-      data: req.body,
+      data: pickAllowed(req.body) as any,
       include: { checkedVehicle: true },
     });
     res.json(offer);
