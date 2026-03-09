@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import api from '../api/client';
+﻿import { useState } from 'react';
+import { authApi } from '../api';
+import { extractApiError } from '../api/client';
 
 interface Props {
   onLogin: () => void;
@@ -18,13 +19,17 @@ export default function LoginScreen({ onLogin }: Props) {
     setLoading(true);
 
     try {
-      const res = await api.post('/auth/login', { login, password });
-      if (res.data.success) {
+      const loginRes = await authApi.login(login, password);
+      if (loginRes.success) {
+        const sessionRes = await authApi.session();
+        if (!sessionRes.authenticated) {
+          throw new Error('Sesja nie zostala zapisana. Sprawdz konfiguracje domeny API.');
+        }
         setFadeOut(true);
         setTimeout(onLogin, 400);
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Błąd logowania');
+      setError(extractApiError(err, 'Blad logowania'));
     } finally {
       setLoading(false);
     }
@@ -53,13 +58,13 @@ export default function LoginScreen({ onLogin }: Props) {
         </div>
 
         <div className="form-group">
-          <label className="form-label">Hasło</label>
+          <label className="form-label">Haslo</label>
           <input
             className="form-input"
             type="password"
             value={password}
             onChange={e => setPassword(e.target.value)}
-            placeholder="Wpisz hasło"
+            placeholder="Wpisz haslo"
             autoComplete="current-password"
           />
         </div>

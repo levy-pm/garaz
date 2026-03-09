@@ -1,9 +1,10 @@
-import { useEffect, useState, useCallback } from 'react';
+﻿import { Fragment, useEffect, useState, useCallback } from 'react';
 import { marketOffersApi, type MarketOffer } from '../../api';
 import VehicleForm from '../../components/VehicleForm';
 import Pagination from '../../components/Pagination';
+import { extractApiError } from '../../api/client';
 
-const fmtPrice = (v: number) => v.toLocaleString('pl-PL') + ' zł';
+const fmtPrice = (v: number) => v.toLocaleString('pl-PL') + ' zĹ‚';
 const fmtKm = (v: number) => v.toLocaleString('pl-PL') + ' km';
 
 export default function MarketOffersPage() {
@@ -41,7 +42,7 @@ export default function MarketOffersPage() {
       setShowModal(false);
       load();
     } catch (err: any) {
-      setSaveError(err.response?.data?.error || 'Błąd zapisu oferty');
+      setSaveError(extractApiError(err, 'Blad zapisu danych'));
     }
   };
 
@@ -52,17 +53,17 @@ export default function MarketOffersPage() {
       setEditingId(null);
       load();
     } catch (err: any) {
-      setSaveError(err.response?.data?.error || 'Błąd aktualizacji oferty');
+      setSaveError(extractApiError(err, 'Blad zapisu danych'));
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Czy na pewno chcesz usunąć tę ofertę?')) return;
+    if (!confirm('Czy na pewno chcesz usunÄ…Ä‡ tÄ™ ofertÄ™?')) return;
     try {
       await marketOffersApi.remove(id);
       load();
     } catch (err: any) {
-      setSaveError(err.response?.data?.error || 'Błąd usuwania oferty');
+      setSaveError(extractApiError(err, 'Blad zapisu danych'));
     }
   };
 
@@ -71,7 +72,7 @@ export default function MarketOffersPage() {
       <div className="page-header">
         <h1 className="page-title">Oferty rynkowe</h1>
         <button className="btn btn-primary" onClick={() => { setShowModal(true); }}>
-          + Dodaj ofertę
+          + Dodaj ofertÄ™
         </button>
       </div>
 
@@ -98,10 +99,10 @@ export default function MarketOffersPage() {
       </div>
 
       {loading ? (
-        <div className="loading">Ładowanie...</div>
+        <div className="loading">Ĺadowanie...</div>
       ) : offers.length === 0 ? (
         <div className="empty-state">
-          <p>Brak ofert rynkowych. Kliknij "Dodaj ofertę" aby dodać pierwszą.</p>
+          <p>Brak ofert rynkowych. Kliknij "Dodaj ofertÄ™" aby dodaÄ‡ pierwszÄ….</p>
         </div>
       ) : (
         <div className="table-wrapper">
@@ -121,14 +122,14 @@ export default function MarketOffersPage() {
             </thead>
             <tbody>
               {offers.map(o => (
-                <>
-                  <tr key={o.id}>
+                <Fragment key={o.id}>
+                  <tr>
                     <td style={{ fontWeight: 600 }}>{o.make}</td>
                     <td>{o.model}</td>
                     <td style={{ fontFamily: 'var(--font-mono)' }}>{o.year}</td>
-                    <td>{o.vehicleType === 'Motocykl' ? 'N/D' : (o.transmission || '—')}</td>
-                    <td style={{ fontFamily: 'var(--font-mono)' }}>{o.mileageKm != null ? fmtKm(o.mileageKm) : '—'}</td>
-                    <td style={{ fontFamily: 'var(--font-mono)', fontWeight: 600 }}>{o.pricePLN != null ? fmtPrice(o.pricePLN) : '—'}</td>
+                    <td>{o.vehicleType === 'Motocykl' ? 'N/D' : (o.transmission || 'â€”')}</td>
+                    <td style={{ fontFamily: 'var(--font-mono)' }}>{o.mileageKm != null ? fmtKm(o.mileageKm) : 'â€”'}</td>
+                    <td style={{ fontFamily: 'var(--font-mono)', fontWeight: 600 }}>{o.pricePLN != null ? fmtPrice(o.pricePLN) : 'â€”'}</td>
                     <td>
                       <span className={`badge ${o.accidentFree ? 'badge-green' : 'badge-red'}`}>
                         {o.accidentFree ? 'Tak' : 'Nie'}
@@ -137,7 +138,7 @@ export default function MarketOffersPage() {
                     <td>
                       {o.offerUrl ? (
                         <a href={o.offerUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: 13 }}>Link</a>
-                      ) : '—'}
+                      ) : 'â€”'}
                     </td>
                     <td>
                       <div style={{ display: 'flex', gap: 4 }}>
@@ -146,12 +147,12 @@ export default function MarketOffersPage() {
                         }}>
                           {editingId === o.id ? 'Zamknij' : 'Edytuj'}
                         </button>
-                        <button className="btn btn-sm btn-danger" onClick={() => handleDelete(o.id)}>Usuń</button>
+                        <button className="btn btn-sm btn-danger" onClick={() => handleDelete(o.id)}>UsuĹ„</button>
                       </div>
                     </td>
                   </tr>
                   {editingId === o.id && (
-                    <tr key={`edit-${o.id}`} className="inline-edit-panel">
+                    <tr className="inline-edit-panel">
                       <td colSpan={9}>
                         <VehicleForm
                           defaultValues={o as any}
@@ -163,7 +164,7 @@ export default function MarketOffersPage() {
                       </td>
                     </tr>
                   )}
-                </>
+                </Fragment>
               ))}
             </tbody>
           </table>
@@ -184,14 +185,14 @@ export default function MarketOffersPage() {
           <div className="modal" style={{ maxWidth: 800 }}>
             <div className="modal-header">
               <h3 className="modal-title">Nowa oferta rynkowa</h3>
-              <button className="btn-icon" onClick={() => setShowModal(false)} style={{ fontSize: 18 }}>✕</button>
+              <button className="btn-icon" onClick={() => setShowModal(false)} style={{ fontSize: 18 }}>âś•</button>
             </div>
             <div className="modal-body">
               <VehicleForm
                 onSubmit={handleCreate}
                 onCancel={() => setShowModal(false)}
                 showOfferFields
-                submitLabel="Dodaj ofertę"
+                submitLabel="Dodaj ofertÄ™"
               />
             </div>
           </div>
@@ -200,3 +201,6 @@ export default function MarketOffersPage() {
     </div>
   );
 }
+
+
+

@@ -12,7 +12,13 @@ router.post('/login', (req, res) => {
 
   if (login === VALID_LOGIN && password === VALID_PASSWORD) {
     req.session.authenticated = true;
-    return res.json({ success: true });
+    req.session.save((err) => {
+      if (err) {
+        return res.status(500).json({ success: false, message: 'Błąd sesji' });
+      }
+      return res.json({ success: true });
+    });
+    return;
   }
 
   return res.status(401).json({ success: false, message: 'Nieprawidłowy login lub hasło' });

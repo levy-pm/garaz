@@ -1,10 +1,11 @@
-import { useEffect, useState, useCallback } from 'react';
+﻿import { useEffect, useState, useCallback } from 'react';
 import { checkedVehiclesApi, marketStatsApi, profitabilityApi, type CheckedVehicle, type MarketStats, type ProfitabilityResult } from '../../api';
 import VehicleForm from '../../components/VehicleForm';
 import ComparisonIndicator from '../../components/ComparisonIndicator';
 import Pagination from '../../components/Pagination';
+import { extractApiError } from '../../api/client';
 
-const fmtPrice = (v: number) => v.toLocaleString('pl-PL') + ' zł';
+const fmtPrice = (v: number) => v.toLocaleString('pl-PL') + ' zĹ‚';
 const fmtKm = (v: number) => v.toLocaleString('pl-PL') + ' km';
 
 export default function CheckedVehiclesPage() {
@@ -57,7 +58,7 @@ export default function CheckedVehiclesPage() {
       setShowAddForm(false);
       load();
     } catch (err: any) {
-      setSaveError(err.response?.data?.error || 'Błąd zapisu pojazdu');
+      setSaveError(extractApiError(err, 'Blad zapisu danych'));
     }
   };
 
@@ -68,17 +69,17 @@ export default function CheckedVehiclesPage() {
       setEditingId(null);
       load();
     } catch (err: any) {
-      setSaveError(err.response?.data?.error || 'Błąd aktualizacji pojazdu');
+      setSaveError(extractApiError(err, 'Blad zapisu danych'));
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Czy na pewno chcesz usunąć ten pojazd?')) return;
+    if (!confirm('Czy na pewno chcesz usunÄ…Ä‡ ten pojazd?')) return;
     try {
       await checkedVehiclesApi.remove(id);
       load();
     } catch (err: any) {
-      setSaveError(err.response?.data?.error || 'Błąd usuwania pojazdu');
+      setSaveError(extractApiError(err, 'Blad zapisu danych'));
     }
   };
 
@@ -135,10 +136,10 @@ export default function CheckedVehiclesPage() {
       </div>
 
       {loading ? (
-        <div className="loading">Ładowanie...</div>
+        <div className="loading">Ĺadowanie...</div>
       ) : vehicles.length === 0 ? (
         <div className="empty-state">
-          <p>Brak pojazdów. Kliknij "Dodaj pojazd" aby dodać pierwszy.</p>
+          <p>Brak pojazdĂłw. Kliknij "Dodaj pojazd" aby dodaÄ‡ pierwszy.</p>
         </div>
       ) : (
         <div className="table-wrapper">
@@ -151,8 +152,8 @@ export default function CheckedVehiclesPage() {
                 <th>Skrzynia</th>
                 <th>Przebieg</th>
                 <th>Cena</th>
-                <th>Śr. przebieg</th>
-                <th>Śr. cena</th>
+                <th>Ĺšr. przebieg</th>
+                <th>Ĺšr. cena</th>
                 <th>Akcje</th>
               </tr>
             </thead>
@@ -221,7 +222,7 @@ function VehicleRow({ vehicle: v, stats, isEditing, onEdit, onSave, onCancelEdit
         <td style={{ fontWeight: 600 }}>{v.make}</td>
         <td>{v.model}</td>
         <td style={{ fontFamily: 'var(--font-mono)' }}>{v.year}</td>
-        <td>{v.vehicleType === 'Motocykl' ? 'N/D' : (v.transmission || '—')}</td>
+        <td>{v.vehicleType === 'Motocykl' ? 'N/D' : (v.transmission || 'â€”')}</td>
         <td>
           <ComparisonIndicator
             value={v.mileageKm}
@@ -237,16 +238,16 @@ function VehicleRow({ vehicle: v, stats, isEditing, onEdit, onSave, onCancelEdit
           />
         </td>
         <td style={{ color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)', fontSize: 13 }}>
-          {stats?.yearStats.avgMileage != null ? fmtKm(Math.round(stats.yearStats.avgMileage)) : '—'}
+          {stats?.yearStats.avgMileage != null ? fmtKm(Math.round(stats.yearStats.avgMileage)) : 'â€”'}
         </td>
         <td style={{ color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)', fontSize: 13 }}>
-          {stats?.yearStats.avgPrice != null ? fmtPrice(Math.round(stats.yearStats.avgPrice)) : '—'}
+          {stats?.yearStats.avgPrice != null ? fmtPrice(Math.round(stats.yearStats.avgPrice)) : 'â€”'}
         </td>
         <td>
           <div style={{ display: 'flex', gap: 4 }}>
             <button className="btn btn-sm" onClick={onEdit}>{isEditing ? 'Zamknij' : 'Edytuj'}</button>
-            <button className="btn btn-sm" onClick={onCalcProfit} title="Kalkulacja opłacalności">Kalk.</button>
-            <button className="btn btn-sm btn-danger" onClick={onDelete}>Usuń</button>
+            <button className="btn btn-sm" onClick={onCalcProfit} title="Kalkulacja opĹ‚acalnoĹ›ci">Kalk.</button>
+            <button className="btn btn-sm btn-danger" onClick={onDelete}>UsuĹ„</button>
           </div>
         </td>
       </tr>
@@ -265,7 +266,7 @@ function VehicleRow({ vehicle: v, stats, isEditing, onEdit, onSave, onCancelEdit
       {showProfit && (
         <tr className="inline-edit-panel">
           <td colSpan={9}>
-            <h4 style={{ marginBottom: 12 }}>Kalkulacja opłacalności</h4>
+            <h4 style={{ marginBottom: 12 }}>Kalkulacja opĹ‚acalnoĹ›ci</h4>
             <div className="form-row" style={{ marginBottom: 16 }}>
               <div className="form-group">
                 <label className="form-label">Typ transakcji</label>
@@ -293,7 +294,7 @@ function VehicleRow({ vehicle: v, stats, isEditing, onEdit, onSave, onCancelEdit
             {profitResult && (
               <div className="profit-panel">
                 <div className="profit-row">
-                  <span className="label">Średnia cena rynkowa</span>
+                  <span className="label">Ĺšrednia cena rynkowa</span>
                   <span className="value">{fmtPrice(profitResult.avgMarketPrice)}</span>
                 </div>
                 <div className="profit-row">
@@ -307,7 +308,7 @@ function VehicleRow({ vehicle: v, stats, isEditing, onEdit, onSave, onCancelEdit
                   </div>
                 ))}
                 <div className="profit-row">
-                  <span className="label">Łączne koszty</span>
+                  <span className="label">ĹÄ…czne koszty</span>
                   <span className="value">{fmtPrice(profitResult.totalCosts)}</span>
                 </div>
                 <div className="profit-row profit-total">
@@ -334,7 +335,7 @@ function VehicleRow({ vehicle: v, stats, isEditing, onEdit, onSave, onCancelEdit
 }
 
 const costLabels: Record<string, string> = {
-  customsDuty: 'Cło',
+  customsDuty: 'CĹ‚o',
   exciseDuty: 'Akcyza',
   vat: 'VAT',
   transportCost: 'Transport',
@@ -342,5 +343,7 @@ const costLabels: Record<string, string> = {
   expertCost: 'Rzeczoznawca',
   repairCost: 'Naprawy',
   incomeTax: 'Podatek dochodowy',
-  desiredMargin: 'Pożądana marża',
+  desiredMargin: 'PoĹĽÄ…dana marĹĽa',
 };
+
+

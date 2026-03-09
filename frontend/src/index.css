@@ -283,10 +283,15 @@ tbody tr:hover {
   white-space: nowrap;
   font-family: inherit;
   min-height: 38px;
+  -webkit-tap-highlight-color: transparent;
 }
 .btn:hover {
   background: var(--border-color);
   border-color: var(--border-hover);
+}
+.btn:active:not(:disabled) {
+  transform: scale(0.96);
+  transition: transform 60ms ease;
 }
 .btn:disabled {
   opacity: 0.5;
@@ -302,6 +307,10 @@ tbody tr:hover {
   background: var(--accent-hover);
   border-color: var(--accent-hover);
 }
+.btn-primary:active:not(:disabled) {
+  background: #4393e6;
+  transform: scale(0.96);
+}
 
 .btn-danger {
   color: var(--red);
@@ -310,6 +319,10 @@ tbody tr:hover {
 .btn-danger:hover {
   background: var(--red-bg);
   border-color: var(--red);
+}
+.btn-danger:active:not(:disabled) {
+  background: rgba(248, 81, 73, 0.2);
+  transform: scale(0.96);
 }
 
 .btn-sm {
@@ -325,10 +338,26 @@ tbody tr:hover {
   color: var(--text-secondary);
   cursor: pointer;
   border-radius: var(--radius);
+  transition: transform 80ms ease, background var(--transition), color var(--transition), filter 80ms ease;
+  -webkit-tap-highlight-color: transparent;
 }
 .btn-icon:hover {
   background: var(--bg-tertiary);
   color: var(--text-primary);
+}
+.btn-icon:active:not(:disabled) {
+  transform: scale(0.94);
+}
+
+.nav-link,
+.pagination-btn,
+.hamburger-btn {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tap-feedback {
+  transform: scale(0.97) translateY(1px) !important;
+  filter: brightness(1.08);
 }
 
 /* ========== Forms ========== */

@@ -3,7 +3,6 @@ import cors from 'cors';
 import session from 'express-session';
 import path from 'path';
 import fs from 'fs';
-import crypto from 'crypto';
 import { PrismaClient } from '@prisma/client';
 import checkedVehicleRoutes from './routes/checkedVehicle';
 import marketOfferRoutes from './routes/marketOffer';
@@ -42,6 +41,15 @@ export const prisma = new PrismaClient();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+const isProduction = process.env.NODE_ENV === 'production';
+const sessionSecret = process.env.SESSION_SECRET || 'motometr-dev-session-secret';
+
+if (!process.env.SESSION_SECRET) {
+  console.warn('[auth] SESSION_SECRET not set, using development fallback secret.');
+}
+
+// Trust proxy (needed behind reverse proxy for secure cookies)
+app.set('trust proxy', 1);
 
 app.use(cors({
   origin: true,
@@ -51,12 +59,13 @@ app.use(express.json());
 
 // Session middleware (in-memory, resets on server restart)
 app.use(session({
-  secret: process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex'),
+  secret: sessionSecret,
   resave: false,
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    secure: false, // set to true behind HTTPS proxy
+    secure: isProduction,
+    sameSite: 'lax',
     maxAge: 24 * 60 * 60 * 1000, // 24h
   },
 }));
