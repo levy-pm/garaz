@@ -178,6 +178,7 @@ router.post('/', vehicleValidation, validate, async (req: Request, res: Response
     const vehicle = await prisma.checkedVehicle.create({ data: pickAllowed(req.body) as any });
     res.status(201).json(vehicle);
   } catch (err) {
+    console.error('Błąd tworzenia pojazdu:', err);
     res.status(500).json({ error: 'Błąd tworzenia pojazdu' });
   }
 });

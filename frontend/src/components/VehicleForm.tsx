@@ -134,8 +134,8 @@ export default function VehicleForm({ defaultValues, onSubmit, onCancel, showOff
     const cleaned: any = { ...data };
     cleaned.accidentFree = data.accidentFree === 'true';
     cleaned.damaged = data.damaged === 'true';
-    // Convert empty strings to null for numeric fields
-    const numericFields = ['engineCapacity', 'horsepowerKM', 'horsepowerKW', 'torque', 'pricePLN', 'priceUSD', 'priceEUR', 'mileageKm', 'mileageMi', 'year'];
+    // Convert empty strings to null for optional numeric fields
+    const numericFields = ['engineCapacity', 'horsepowerKM', 'horsepowerKW', 'torque', 'pricePLN', 'priceUSD', 'priceEUR', 'mileageKm', 'mileageMi'];
     for (const f of numericFields) {
       if (cleaned[f] === '' || cleaned[f] === undefined) {
         cleaned[f] = null;
@@ -143,6 +143,8 @@ export default function VehicleForm({ defaultValues, onSubmit, onCancel, showOff
         cleaned[f] = Number(cleaned[f]);
       }
     }
+    // year is required — convert to number (validation ensures it's set)
+    cleaned.year = Number(cleaned.year);
     if (!cleaned.damageDescription) cleaned.damageDescription = null;
     if (!cleaned.continent) cleaned.continent = null;
     if (!cleaned.country) cleaned.country = null;
@@ -189,10 +191,11 @@ export default function VehicleForm({ defaultValues, onSubmit, onCancel, showOff
         </div>
         <div className="form-group">
           <label className="form-label">Rok *</label>
-          <select className="form-select" {...register('year', { required: true, valueAsNumber: true })}>
+          <select className="form-select" {...register('year', { required: 'Rok jest wymagany', valueAsNumber: true, validate: v => (v && v >= 1900) || 'Rok jest wymagany' })}>
             <option value="">Wybierz</option>
             {years.map(y => <option key={y} value={y}>{y}</option>)}
           </select>
+          {errors.year && <span className="form-error">{errors.year.message}</span>}
         </div>
       </div>
 
