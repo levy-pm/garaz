@@ -14,7 +14,7 @@ const allowedFields = [
   'horsepowerKM', 'horsepowerKW', 'torque',
   'pricePLN', 'priceUSD', 'priceEUR', 'currency',
   'mileageKm', 'mileageMi',
-  'accidentFree', 'damaged', 'damageDescription',
+  'accidentFree', 'accidentCount', 'damaged', 'damageDescription',
   'continent', 'country', 'notes', 'isArchived',
   'checkedVehicleId', 'offerUrl', 'equipment',
 ];

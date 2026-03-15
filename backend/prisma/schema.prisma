@@ -34,6 +34,7 @@ model CheckedVehicle {
   mileageKm         Float?
   mileageMi         Float?
   accidentFree      Boolean  @default(true)
+  accidentCount     Int      @default(0)
   damaged           Boolean  @default(false)
   damageDescription String?  @db.Text
   continent         String?  @db.VarChar(100)
@@ -75,6 +76,7 @@ model MarketOffer {
   mileageKm       Float?
   mileageMi       Float?
   accidentFree    Boolean  @default(true)
+  accidentCount   Int      @default(0)
   damaged         Boolean  @default(false)
   damageDescription String? @db.Text
   continent       String?  @db.VarChar(100)
@@ -117,6 +119,12 @@ model Settings {
   transportCost         Float    @default(0)     // koszt transportu
   registrationCost      Float    @default(0)     // koszt rejestracji
   expertCost            Float    @default(0)     // koszt rzeczoznawcy
+  translationCost       Float    @default(0)     // koszt tlumaczenia dokumentow
+  inspectionCost        Float    @default(0)     // koszt przegladu technicznego
+  exchangeRateEUR       Float    @default(4.30)  // kurs EUR/PLN (reczny, docelowo z NBP)
+  exchangeRateUSD       Float    @default(3.95)  // kurs USD/PLN (reczny, docelowo z NBP)
+  desiredROI            Float    @default(10)    // pozadany ROI (%)
+  accidentDiscountPercent Float  @default(10)    // redukcja proposedPrice per wypadek (%)
   isArchived            Boolean  @default(false)
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt

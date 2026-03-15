@@ -9,6 +9,8 @@ import marketOfferRoutes from './routes/marketOffer';
 import settingsRoutes from './routes/settings';
 import marketAnalysisRoutes from './routes/marketAnalysis';
 import profitabilityRoutes from './routes/profitability';
+import importRoutes from './routes/import';
+import comparisonRoutes from './routes/comparison';
 import authRoutes from './routes/auth';
 import catalogRoutes from './routes/catalog';
 
@@ -95,6 +97,8 @@ app.use('/api/market-offers', marketOfferRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/market-analysis', marketAnalysisRoutes);
 app.use('/api/profitability', profitabilityRoutes);
+app.use('/api/import', importRoutes);
+app.use('/api/comparison', comparisonRoutes);
 
 const frontendDistPath = path.resolve(__dirname, '../../frontend/dist');
 const frontendIndexPath = path.join(frontendDistPath, 'index.html');

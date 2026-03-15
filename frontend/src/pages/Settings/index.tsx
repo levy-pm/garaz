@@ -59,15 +59,41 @@ export default function SettingsPage() {
         </div>
       </div>
 
+      {/* Exchange rates */}
+      <div className="card">
+        <h3 style={{ fontSize: 16, marginBottom: 16 }}>Kursy walut</h3>
+        <div className="form-row">
+          <SettingsField label="Kurs EUR/PLN" value={settings.exchangeRateEUR} onChange={v => handleChange('exchangeRateEUR', v)} step="0.01" />
+          <SettingsField label="Kurs USD/PLN" value={settings.exchangeRateUSD} onChange={v => handleChange('exchangeRateUSD', v)} step="0.01" />
+        </div>
+        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8, marginBottom: 0 }}>
+          Kursy walut ustawiane ręcznie. Docelowo możliwa integracja z API NBP.
+        </p>
+      </div>
+
+      {/* ROI */}
+      <div className="card">
+        <h3 style={{ fontSize: 16, marginBottom: 16 }}>Opłacalność</h3>
+        <div className="form-row">
+          <SettingsField label="Pożądany ROI (%)" value={settings.desiredROI} onChange={v => handleChange('desiredROI', v)} />
+          <SettingsField label="Pożądana marża (PLN)" value={settings.desiredMargin} onChange={v => handleChange('desiredMargin', v)} />
+          <SettingsField label="Redukcja za wypadek (%)" value={settings.accidentDiscountPercent} onChange={v => handleChange('accidentDiscountPercent', v)} />
+        </div>
+        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8, marginBottom: 0 }}>
+          Redukcja za wypadek jest stosowana kumulacyjnie. Np. 10% × 2 wypadki = 20% redukcji proposedPrice.
+        </p>
+      </div>
+
       {/* Costs */}
       <div className="card">
-        <h3 style={{ fontSize: 16, marginBottom: 16 }}>Koszty dodatkowe</h3>
+        <h3 style={{ fontSize: 16, marginBottom: 16 }}>Koszty dodatkowe (wartości domyślne)</h3>
         <div className="form-row">
-          <SettingsField label="Szacowane koszty napraw (PLN)" value={settings.estimatedRepairCost} onChange={v => handleChange('estimatedRepairCost', v)} />
-          <SettingsField label="Pożądana marża (PLN)" value={settings.desiredMargin} onChange={v => handleChange('desiredMargin', v)} />
           <SettingsField label="Koszt transportu (PLN)" value={settings.transportCost} onChange={v => handleChange('transportCost', v)} />
           <SettingsField label="Koszt rejestracji (PLN)" value={settings.registrationCost} onChange={v => handleChange('registrationCost', v)} />
+          <SettingsField label="Koszt tłumaczenia (PLN)" value={settings.translationCost} onChange={v => handleChange('translationCost', v)} />
+          <SettingsField label="Koszt przeglądu (PLN)" value={settings.inspectionCost} onChange={v => handleChange('inspectionCost', v)} />
           <SettingsField label="Koszt rzeczoznawcy (PLN)" value={settings.expertCost} onChange={v => handleChange('expertCost', v)} />
+          <SettingsField label="Szacowane koszty napraw (PLN)" value={settings.estimatedRepairCost} onChange={v => handleChange('estimatedRepairCost', v)} />
         </div>
       </div>
 
@@ -82,14 +108,14 @@ export default function SettingsPage() {
   );
 }
 
-function SettingsField({ label, value, onChange }: { label: string; value: number; onChange: (v: string) => void }) {
+function SettingsField({ label, value, onChange, step }: { label: string; value: number; onChange: (v: string) => void; step?: string }) {
   return (
     <div className="form-group">
       <label className="form-label">{label}</label>
       <input
         className="form-input"
         type="number"
-        step="0.1"
+        step={step || '0.1'}
         value={value}
         onChange={e => onChange(e.target.value)}
       />

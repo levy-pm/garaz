@@ -6,6 +6,8 @@ const navItems = [
   { to: '/vehicles', label: 'Sprawdzane pojazdy' },
   { to: '/offers', label: 'Oferty rynkowe' },
   { to: '/market', label: 'Sprawdź rynek' },
+  { to: '/profitability', label: 'Opłacalność' },
+  { to: '/comparison', label: 'Porównanie' },
   { to: '/settings', label: 'Ustawienia' },
 ];
 

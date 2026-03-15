@@ -7,6 +7,8 @@ import CheckedVehiclesPage from './pages/CheckedVehicles';
 import MarketOffersPage from './pages/MarketOffers';
 import MarketCheckPage from './pages/MarketCheck';
 import SettingsPage from './pages/Settings';
+import ProfitabilityPage from './pages/Profitability';
+import ComparisonPage from './pages/Comparison';
 import { authApi } from './api';
 import { API_UNAUTHORIZED_EVENT } from './api/client';
 
@@ -66,6 +68,8 @@ function App() {
             <Route path="/vehicles" element={<CheckedVehiclesPage />} />
             <Route path="/offers" element={<MarketOffersPage />} />
             <Route path="/market" element={<MarketCheckPage />} />
+            <Route path="/profitability" element={<ProfitabilityPage />} />
+            <Route path="/comparison" element={<ComparisonPage />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Route>
         </Routes>

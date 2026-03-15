@@ -37,6 +37,7 @@ export interface CheckedVehicle {
   mileageKm?: number;
   mileageMi?: number;
   accidentFree: boolean;
+  accidentCount: number;
   damaged: boolean;
   damageDescription?: string;
   continent?: string;
@@ -76,6 +77,7 @@ export interface MarketOffer {
   mileageKm?: number;
   mileageMi?: number;
   accidentFree: boolean;
+  accidentCount: number;
   damaged: boolean;
   damageDescription?: string;
   continent?: string;
@@ -100,6 +102,12 @@ export interface Settings {
   transportCost: number;
   registrationCost: number;
   expertCost: number;
+  translationCost: number;
+  inspectionCost: number;
+  exchangeRateEUR: number;
+  exchangeRateUSD: number;
+  desiredROI: number;
+  accidentDiscountPercent: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -120,6 +128,9 @@ export interface MarketStats {
     medianMileage: number | null;
   };
   proposedPrice: number | null;
+  proposedPriceAdjusted: number | null;
+  accidentDiscount: number;
+  accidentCount: number;
 }
 
 export interface MarketTrend {
@@ -136,18 +147,60 @@ export interface MarketAnalysis {
   totalOffers: number;
 }
 
-export interface ProfitabilityResult {
-  type: string;
-  avgMarketPrice: number;
+export type SourceRegion = 'EU' | 'NON_EU';
+export type PurchaseCurrency = 'PLN' | 'EUR' | 'USD';
+export type CalcMode = 'AUCTION' | 'BUY_NOW' | 'MAX_BID';
+
+export interface ProfitabilityRequest {
+  vehicleId: number;
   purchasePrice: number;
+  purchaseCurrency: PurchaseCurrency;
+  sourceRegion: SourceRegion;
+  isNetto: boolean;
+  mode: CalcMode;
+  transportCost?: number;
+  registrationCost?: number;
+  translationCost?: number;
+  inspectionCost?: number;
+  appraiserCost?: number;
+  repairCost?: number;
+}
+
+export interface ProfitabilityBreakdown {
+  basePricePLN: number;
+  customsDuty: number;
+  exciseDuty: number;
+  vatImport: number;
+  transportCost: number;
+  registrationCost: number;
+  translationCost: number;
+  inspectionCost: number;
+  appraiserCost: number;
+  repairCost: number;
+  fixedCosts: number;
   totalCosts: number;
-  breakdown: Record<string, number>;
+}
+
+export interface ProfitabilityResult {
+  vehicle: { id: number; make: string; model: string; year: number; engineCapacity?: number };
+  avgMarketPrice: number | null;
+  medianMarketPrice: number | null;
+  basePricePLN: number;
+  customsDuty: number;
+  exciseDuty: number;
+  vatImport: number;
+  fixedCosts: number;
+  totalCosts: number;
+  grossProfit: number | null;
   incomeTax: number;
-  desiredMargin: number;
-  totalWithTaxAndMargin: number;
-  maxBuyPrice: number;
-  estimatedProfit: number;
-  profitable: boolean;
+  netProfit: number | null;
+  roi: number | null;
+  maxBuyPricePLN: number;
+  maxBuyPriceOriginalCurrency: number;
+  purchaseCurrency: PurchaseCurrency;
+  profitabilityDecision: 'PROFITABLE' | 'NOT_PROFITABLE' | 'NO_MARKET_DATA';
+  mode: CalcMode;
+  breakdown: ProfitabilityBreakdown;
 }
 
 export const checkedVehiclesApi = createCrud<CheckedVehicle>('/checked-vehicles');
@@ -169,8 +222,116 @@ export const marketAnalysisApi = {
 };
 
 export const profitabilityApi = {
-  calculate: (data: { vehicleId: number; type: string; purchasePrice: number; purchaseCurrency: string; isImport: boolean }) =>
+  calculate: (data: ProfitabilityRequest) =>
     api.post<ProfitabilityResult>('/profitability/calculate', data).then(r => r.data),
+};
+
+// ── Import types ─────────────────────────────────────────────────────
+
+export interface ImportPreview {
+  headers: string[];
+  mapping: Record<string, string | null>;
+  totalRows: number;
+  validRows: number;
+  invalidRows: number;
+  sampleRows: Record<string, string>[];
+  validationErrors: { row: number; field: string; message: string; value: string }[];
+  duplicateCount: number;
+}
+
+export interface ImportResult {
+  imported: number;
+  skipped: number;
+  rejected: number;
+  rejectedReasons: { row: number; reasons: string[] }[];
+  duplicatesSkipped: number;
+}
+
+// ── Comparison types ─────────────────────────────────────────────────
+
+export interface VehicleComparison {
+  vehicle: {
+    id: number;
+    vehicleType: string;
+    make: string;
+    model: string;
+    year: number;
+    version: string | null;
+    equipmentVersion: string | null;
+    bodyType: string | null;
+    fuelType: string | null;
+    color: string | null;
+    transmission: string | null;
+    driveType: string | null;
+    engineCapacity: number | null;
+    horsepowerKM: number | null;
+    horsepowerKW: number | null;
+    torque: number | null;
+    pricePLN: number | null;
+    priceEUR: number | null;
+    priceUSD: number | null;
+    currency: string;
+    mileageKm: number | null;
+    mileageMi: number | null;
+    accidentFree: boolean;
+    accidentCount: number;
+    damaged: boolean;
+    continent: string | null;
+    country: string | null;
+    notes: string | null;
+    equipment: string | null;
+  };
+  marketData: {
+    offerCount: number;
+    avgPrice: number | null;
+    medianPrice: number | null;
+    minPrice: number | null;
+    maxPrice: number | null;
+    avgMileage: number | null;
+    proposedPrice: number | null;
+    proposedPriceAdjusted: number | null;
+    accidentDiscount: number;
+  };
+  profitability: {
+    totalCosts: number;
+    grossProfit: number | null;
+    netProfit: number | null;
+    roi: number | null;
+    maxBuyPricePLN: number;
+    profitabilityDecision: string;
+  } | null;
+}
+
+export interface ComparisonResponse {
+  comparisons: VehicleComparison[];
+  settings: { accidentDiscountPercent: number };
+}
+
+export const importApi = {
+  preview: (file: File, checkedVehicleId?: number) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    if (checkedVehicleId) formData.append('checkedVehicleId', String(checkedVehicleId));
+    return api.post<ImportPreview>('/import/preview', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }).then(r => r.data);
+  },
+  commit: (file: File, mapping: Record<string, string | null>, checkedVehicleId?: number, skipDuplicates = true) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('mapping', JSON.stringify(mapping));
+    formData.append('skipDuplicates', String(skipDuplicates));
+    if (checkedVehicleId) formData.append('checkedVehicleId', String(checkedVehicleId));
+    return api.post<ImportResult>('/import/commit', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }).then(r => r.data);
+  },
+  targetFields: () => api.get<string[]>('/import/target-fields').then(r => r.data),
+};
+
+export const comparisonApi = {
+  compare: (vehicleIds: number[]) =>
+    api.post<ComparisonResponse>('/comparison', { vehicleIds }).then(r => r.data),
 };
 
 export const authApi = {

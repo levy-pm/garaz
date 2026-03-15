@@ -1,30 +1,62 @@
 import { Router, Request, Response } from 'express';
+import { body } from 'express-validator';
 import { prisma } from '../index';
+import { validate } from '../middleware/validate';
+import {
+  calculateProfitability,
+  type CalcInput,
+  type PurchaseCurrency,
+  type SourceRegion,
+  type CalcMode,
+} from '../services/profitability.service';
 
 const router = Router();
 
-// Calculate profitability for a vehicle (purchase or auction)
-router.post('/calculate', async (req: Request, res: Response) => {
+const calculateValidation = [
+  body('vehicleId').isInt({ min: 1 }).withMessage('vehicleId musi być liczbą całkowitą > 0'),
+  body('purchasePrice').isFloat({ min: 0 }).withMessage('purchasePrice musi być liczbą >= 0'),
+  body('purchaseCurrency').isIn(['PLN', 'EUR', 'USD']).withMessage('purchaseCurrency musi być PLN, EUR lub USD'),
+  body('sourceRegion').isIn(['EU', 'NON_EU']).withMessage('sourceRegion musi być EU lub NON_EU'),
+  body('isNetto').isBoolean().withMessage('isNetto musi być wartością boolean'),
+  body('mode').isIn(['AUCTION', 'BUY_NOW', 'MAX_BID']).withMessage('mode musi być AUCTION, BUY_NOW lub MAX_BID'),
+  body('transportCost').optional().isFloat({ min: 0 }).withMessage('transportCost musi być >= 0'),
+  body('registrationCost').optional().isFloat({ min: 0 }).withMessage('registrationCost musi być >= 0'),
+  body('translationCost').optional().isFloat({ min: 0 }).withMessage('translationCost musi być >= 0'),
+  body('inspectionCost').optional().isFloat({ min: 0 }).withMessage('inspectionCost musi być >= 0'),
+  body('appraiserCost').optional().isFloat({ min: 0 }).withMessage('appraiserCost musi być >= 0'),
+  body('repairCost').optional().isFloat({ min: 0 }).withMessage('repairCost musi być >= 0'),
+];
+
+router.post('/calculate', calculateValidation, validate, async (req: Request, res: Response) => {
   try {
     const {
       vehicleId,
-      type, // 'purchase' or 'auction'
       purchasePrice,
-      purchaseCurrency, // PLN, USD, EUR
-      isImport, // true if from abroad
+      purchaseCurrency,
+      sourceRegion,
+      isNetto,
+      mode,
+      transportCost,
+      registrationCost,
+      translationCost,
+      inspectionCost,
+      appraiserCost,
+      repairCost,
     } = req.body;
 
-    // Get settings
+    // Fetch settings
     let settings = await prisma.settings.findFirst({ where: { isArchived: false } });
     if (!settings) {
       settings = await prisma.settings.create({ data: {} });
     }
 
-    // Get vehicle data
+    // Fetch vehicle
     const vehicle = await prisma.checkedVehicle.findUnique({ where: { id: vehicleId } });
-    if (!vehicle) return res.status(404).json({ error: 'Nie znaleziono pojazdu' });
+    if (!vehicle) {
+      return res.status(404).json({ error: 'Nie znaleziono pojazdu' });
+    }
 
-    // Get market stats for average selling price
+    // Fetch market offers for avgMarketPrice and medianMarketPrice
     const offers = await prisma.marketOffer.findMany({
       where: {
         isArchived: false,
@@ -34,83 +66,65 @@ router.post('/calculate', async (req: Request, res: Response) => {
       },
     });
 
-    const prices = offers.filter(o => o.pricePLN != null).map(o => o.pricePLN!);
-    const avgMarketPrice = prices.length ? prices.reduce((a, b) => a + b, 0) / prices.length : null;
+    const prices = offers
+      .filter(o => o.pricePLN != null && o.pricePLN > 0)
+      .map(o => o.pricePLN!);
 
-    if (avgMarketPrice === null) {
-      return res.status(400).json({ error: 'Brak danych rynkowych do kalkulacji' });
+    let avgMarketPrice: number | null = null;
+    let medianMarketPrice: number | null = null;
+
+    if (prices.length > 0) {
+      avgMarketPrice = prices.reduce((a, b) => a + b, 0) / prices.length;
+
+      const sorted = [...prices].sort((a, b) => a - b);
+      const mid = Math.floor(sorted.length / 2);
+      medianMarketPrice = sorted.length % 2 === 0
+        ? (sorted[mid - 1] + sorted[mid]) / 2
+        : sorted[mid];
     }
 
-    // Calculate all costs
-    let basePricePLN = purchasePrice;
-    // Currency conversion would use real rates in production; for now accept PLN
-    // If needed, front-end sends pricePLN
+    // Build calculation input
+    const calcInput: CalcInput = {
+      purchasePrice: Number(purchasePrice),
+      purchaseCurrency: purchaseCurrency as PurchaseCurrency,
+      sourceRegion: sourceRegion as SourceRegion,
+      isNetto: Boolean(isNetto),
+      mode: mode as CalcMode,
+      engineCapacity: vehicle.engineCapacity,
+      avgMarketPrice,
+      medianMarketPrice,
+      transportCost: transportCost ?? settings.transportCost,
+      registrationCost: registrationCost ?? settings.registrationCost,
+      translationCost: translationCost ?? settings.translationCost,
+      inspectionCost: inspectionCost ?? settings.inspectionCost,
+      appraiserCost: appraiserCost ?? settings.expertCost,
+      repairCost: repairCost ?? (vehicle.damaged ? settings.estimatedRepairCost : 0),
+      settings: {
+        exciseDutySmall: settings.exciseDutySmall,
+        exciseDutyLarge: settings.exciseDutyLarge,
+        customsDuty: settings.customsDuty,
+        incomeTax: settings.incomeTax,
+        vat: settings.vat,
+        exchangeRateEUR: settings.exchangeRateEUR,
+        exchangeRateUSD: settings.exchangeRateUSD,
+        desiredROI: settings.desiredROI,
+      },
+    };
 
-    let totalCosts = basePricePLN;
-    const breakdown: Record<string, number> = { basePricePLN };
-
-    if (isImport) {
-      const customsDuty = basePricePLN * (settings.customsDuty / 100);
-      breakdown.customsDuty = customsDuty;
-      totalCosts += customsDuty;
-
-      const engineCapacity = vehicle.engineCapacity || 0;
-      const exciseRate = engineCapacity > 2.0 ? settings.exciseDutyLarge : settings.exciseDutySmall;
-      const exciseDuty = basePricePLN * (exciseRate / 100);
-      breakdown.exciseDuty = exciseDuty;
-      totalCosts += exciseDuty;
-
-      const vat = (basePricePLN + customsDuty + exciseDuty) * (settings.vat / 100);
-      breakdown.vat = vat;
-      totalCosts += vat;
-    }
-
-    breakdown.transportCost = settings.transportCost;
-    totalCosts += settings.transportCost;
-
-    breakdown.registrationCost = settings.registrationCost;
-    totalCosts += settings.registrationCost;
-
-    breakdown.expertCost = settings.expertCost;
-    totalCosts += settings.expertCost;
-
-    if (vehicle.damaged) {
-      breakdown.repairCost = settings.estimatedRepairCost;
-      totalCosts += settings.estimatedRepairCost;
-    }
-
-    const incomeTax = (avgMarketPrice - totalCosts) > 0
-      ? (avgMarketPrice - totalCosts) * (settings.incomeTax / 100)
-      : 0;
-    breakdown.incomeTax = incomeTax;
-
-    const desiredMargin = settings.desiredMargin;
-    breakdown.desiredMargin = desiredMargin;
-
-    const totalWithTaxAndMargin = totalCosts + incomeTax + desiredMargin;
-
-    // Max buy/bid price = avgMarketPrice - all costs except base price
-    const costsWithoutBase = totalCosts - basePricePLN;
-    const maxPrice = avgMarketPrice - costsWithoutBase - incomeTax - desiredMargin;
-
-    const profit = avgMarketPrice - totalWithTaxAndMargin;
+    const result = calculateProfitability(calcInput);
 
     res.json({
-      type,
-      avgMarketPrice: Math.round(avgMarketPrice),
-      purchasePrice: basePricePLN,
-      totalCosts: Math.round(totalCosts),
-      breakdown: Object.fromEntries(
-        Object.entries(breakdown).map(([k, v]) => [k, Math.round(v)])
-      ),
-      incomeTax: Math.round(incomeTax),
-      desiredMargin: Math.round(desiredMargin),
-      totalWithTaxAndMargin: Math.round(totalWithTaxAndMargin),
-      maxBuyPrice: Math.round(Math.max(0, maxPrice)),
-      estimatedProfit: Math.round(profit),
-      profitable: profit > 0,
+      vehicle: {
+        id: vehicle.id,
+        make: vehicle.make,
+        model: vehicle.model,
+        year: vehicle.year,
+        engineCapacity: vehicle.engineCapacity,
+      },
+      ...result,
     });
   } catch (err) {
+    console.error('Profitability calculation error:', err);
     res.status(500).json({ error: 'Błąd kalkulacji' });
   }
 });

@@ -3,6 +3,7 @@ import { marketOffersApi, type MarketOffer } from '../../api';
 import VehicleForm from '../../components/VehicleForm';
 import Pagination from '../../components/Pagination';
 import { extractApiError } from '../../api/client';
+import ImportModal from './ImportModal';
 
 const fmtPrice = (v: number) => v.toLocaleString('pl-PL') + ' zĹ‚';
 const fmtKm = (v: number) => v.toLocaleString('pl-PL') + ' km';
@@ -17,6 +18,7 @@ export default function MarketOffersPage() {
   const [sortBy, setSortBy] = useState('createdAt');
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [saveError, setSaveError] = useState('');
 
@@ -71,9 +73,14 @@ export default function MarketOffersPage() {
     <div>
       <div className="page-header">
         <h1 className="page-title">Oferty rynkowe</h1>
-        <button className="btn btn-primary" onClick={() => { setShowModal(true); }}>
-          + Dodaj ofertÄ™
-        </button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button className="btn" onClick={() => setShowImport(true)}>
+            Import CSV/Excel
+          </button>
+          <button className="btn btn-primary" onClick={() => { setShowModal(true); }}>
+            + Dodaj ofertÄ™
+          </button>
+        </div>
       </div>
 
       {saveError && (
@@ -197,6 +204,14 @@ export default function MarketOffersPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Import modal */}
+      {showImport && (
+        <ImportModal
+          onClose={() => setShowImport(false)}
+          onImported={() => { load(); }}
+        />
       )}
     </div>
   );

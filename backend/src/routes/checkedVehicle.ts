@@ -14,7 +14,7 @@ const allowedFields = [
   'horsepowerKM', 'horsepowerKW', 'torque',
   'pricePLN', 'priceUSD', 'priceEUR', 'currency',
   'mileageKm', 'mileageMi',
-  'accidentFree', 'damaged', 'damageDescription',
+  'accidentFree', 'accidentCount', 'damaged', 'damageDescription',
   'continent', 'country', 'notes', 'isArchived',
 ];
 
@@ -144,10 +144,28 @@ router.get('/:id/market-stats', async (req: Request, res: Response) => {
       proposedPrice = Math.round(basePrice * mileageAdjustment);
     }
 
+    // Accident discount on proposedPrice
+    let settings = await prisma.settings.findFirst({ where: { isArchived: false } });
+    if (!settings) {
+      settings = await prisma.settings.create({ data: {} });
+    }
+
+    let proposedPriceAdjusted = proposedPrice;
+    let accidentDiscount = 0;
+    if (proposedPrice !== null && !vehicle.accidentFree && vehicle.accidentCount > 0) {
+      const rate = (settings.accidentDiscountPercent / 100) * vehicle.accidentCount;
+      const cappedRate = Math.min(rate, 1);
+      accidentDiscount = Math.round(cappedRate * 100);
+      proposedPriceAdjusted = Math.round(proposedPrice * (1 - cappedRate));
+    }
+
     res.json({
       yearStats,
       modelStats,
       proposedPrice,
+      proposedPriceAdjusted,
+      accidentDiscount,
+      accidentCount: vehicle.accidentCount,
     });
   } catch (err) {
     res.status(500).json({ error: 'Błąd serwera' });
